@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Awesome Worktime Tracker 2000 Mobile</string>
+    <string name="login_label">Ole hyvä, ja kirjaudu sisään.</string>
+    <string name="user_name">Käyttäjätunnus</string>
+    <string name="password">Salasana</string>
+    <string name="button_login_label">Kirjaudu</string>
+</resources>
