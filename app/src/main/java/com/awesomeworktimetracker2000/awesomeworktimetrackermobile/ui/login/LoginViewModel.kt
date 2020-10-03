@@ -2,7 +2,7 @@ package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.ui.login
 
 import android.util.Log
 import androidx.lifecycle.*
-import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.entities.UserInfo
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.UserInfo
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.Credentials
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.UserRepository
 import kotlinx.coroutines.launch
