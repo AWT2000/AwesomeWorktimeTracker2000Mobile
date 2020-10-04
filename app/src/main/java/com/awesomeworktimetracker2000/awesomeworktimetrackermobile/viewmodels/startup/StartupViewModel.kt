@@ -1,25 +1,37 @@
 package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.startup
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.util.Log
+import androidx.lifecycle.*
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.UserInfo
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.UserRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class StartupViewModel() : ViewModel() {
+class StartupViewModel(private val userRepository: UserRepository) : ViewModel() {
 
-    private val _hasValidUserInfo = MutableLiveData<Boolean?>()
+    private val user: LiveData<UserInfo?> = userRepository.user
 
+    /**
+     * Boolean flag that indicates if we have valid user data in cache or not.
+     */
     val hasValidUserInfo: LiveData<Boolean?>
-        get() = _hasValidUserInfo
+        get() = Transformations.map(user) {
+            it != null
+        }
 
-    fun tryLogin() {
-        _hasValidUserInfo.value = false
+    /**
+     * Launches coroutine that tries to fetch user info from db and validate it with request to web api.
+     * Updates live data.
+     */
+    fun tryLoginWithCache() {
+        viewModelScope.launch {
+            userRepository.tryCache()
+        }
     }
 
-    private suspend fun onCheckCache() {
-
-    }
-
-    fun onTryLoginComplete() {
-        _hasValidUserInfo.value = null
+    override fun onCleared() {
+        super.onCleared()
+        Log.i("login", "StartupViewModel cleared")
     }
 }

@@ -12,7 +12,10 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.databinding.S
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.R
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.AWTDatabase
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApi
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.startup.StartupViewModel
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.startup.StartupViewModelFactory
 
 class StartupFragment : Fragment() {
     private val LOG_TAG: String = "StartupFragment";
@@ -28,23 +31,26 @@ class StartupFragment : Fragment() {
         // initialize binding
         val binding = DataBindingUtil.inflate<StartupFragmentBinding>(inflater, R.layout.startup_fragment, container, false)
 
+        val application = requireNotNull(this.activity).application
+
         // initialize view model
-        viewModel = ViewModelProvider(this).get(StartupViewModel::class.java)
+        val viewModelFactory = StartupViewModelFactory(
+            AWTDatabase.getInstance(application).userDao,
+            AWTApi.service
+        )
+        viewModel = ViewModelProvider(this, viewModelFactory).get(StartupViewModel::class.java)
 
         // observe view model's live data
         viewModel.hasValidUserInfo.observe(viewLifecycleOwner, Observer { hasValidUserInfo ->
-            // TODO: check if has valid user info
-            // for now just navigate
-            this.findNavController().navigate(R.id.action_startupFragment_to_loginFragment)
+            if (hasValidUserInfo == true) {
+                this.findNavController().navigate(R.id.action_startupFragment_to_mainFragment)
+            } else {
+                this.findNavController().navigate(R.id.action_startupFragment_to_loginFragment)
+            }
         })
 
-        tryLogin()
+        viewModel.tryLoginWithCache()
 
         return binding.root
     }
-
-    private fun tryLogin() {
-        viewModel.tryLogin()
-    }
-
 }

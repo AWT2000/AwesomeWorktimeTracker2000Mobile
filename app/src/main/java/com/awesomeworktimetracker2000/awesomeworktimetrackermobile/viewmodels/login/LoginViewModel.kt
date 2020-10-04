@@ -1,17 +1,18 @@
-package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.ui.login
+package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.login
 
 import android.util.Log
 import androidx.lifecycle.*
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.AWTDatabase
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.daos.UserInfoDao
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.UserInfo
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.Credentials
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApi
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.UserRepository
 import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(private val userRepository: UserRepository) : ViewModel() {
 
-    private val userRepository: UserRepository = UserRepository()
-
-    val userInfo: LiveData<UserInfo>
+    private val userInfo: LiveData<UserInfo?>
         get() = userRepository.user
 
     val canContinue = Transformations.map(userInfo) {
@@ -23,7 +24,9 @@ class LoginViewModel : ViewModel() {
     val loginButtonEnabled: LiveData<Boolean?>
         get() = _loginButtonEnabled
 
-
+    /**
+     * Launches coroutine that makes HTTP POST request to web API
+     */
     fun tryLogin(email: String, password: String) {
         viewModelScope.launch {
             Log.i("login", "LoginViewModel@tryLogin")
@@ -37,5 +40,10 @@ class LoginViewModel : ViewModel() {
 
     fun onLoginComplete() {
         _loginButtonEnabled.value = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.i("login", "LoginViewModel cleared")
     }
 }
