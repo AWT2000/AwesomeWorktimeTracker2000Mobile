@@ -76,6 +76,7 @@ class UserRepository(
 
     /**
      * Makes a request to web api to check if cached user info is valid.
+     * If user from db was not valid, removes cached user info.
      * @return UserInfo from web api | null
      */
     private suspend fun tryTokenValidity(user: UserInfo): UserInfo? {
@@ -89,6 +90,7 @@ class UserRepository(
             )
         } catch (e: Exception) {
             Log.i("login", "UserRepository@tryTokenValidity, error: " + e.message.toString())
+            userInfoDao.removeUser()
             null
         }
     }
@@ -105,7 +107,7 @@ class UserRepository(
                 loginResponseDto.user.email,
                 loginResponseDto.access_token
             ))
-            Log.i("login", "UserRepository, loginResponseDto.access_token: " + loginResponseDto.access_token)
+            Log.i("login", "UserRepository, loginResponseDto.user.name: " + loginResponseDto.user.name)
         } catch (e: Exception) {
             Log.i("login", "UserRepository, error: " + e.message.toString())
             _user.postValue(null)
