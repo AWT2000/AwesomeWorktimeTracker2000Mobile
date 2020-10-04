@@ -3,39 +3,136 @@ package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.reposit
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.daos.UserInfoDao
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.entities.DatabaseUserInfo
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.UserInfo
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.Credentials
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.auth.LoginResponseDto
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApiService
+import kotlinx.coroutines.*
 import java.lang.Exception
 
-class UserRepository() {
+class UserRepository(
+    private val userInfoDao: UserInfoDao,
+    private val apiService: AWTApiService
+) {
 
-    private val _user = MutableLiveData<UserInfo>()
+    private val _user = MutableLiveData<UserInfo?>()
 
-    val user: LiveData<UserInfo>
+    val user: LiveData<UserInfo?>
         get() = _user
 
-    suspend fun fetchUser() {
-
+    /**
+     * Tries to fetch user info from db and then tries to validate it by making api request.
+     * Updates live data.
+     */
+    suspend fun tryCache() {
+        Log.i("login", "UserRepository@tryCache")
+        val userFromCache = getUserFromCache()
+        if (userFromCache != null) {
+            val userFromApi = tryTokenValidity(userFromCache)
+            if (userFromApi != null) {
+                if (userFromApi.name != userFromCache.name
+                    || userFromApi.email != userFromCache.email) {
+                    updateCachedUser(userFromApi)
+                } else {
+                    _user.postValue(userFromCache)
+                }
+            } else {
+                Log.i("login", "UserRepository@tryCache, userFromCache = null")
+                _user.postValue(null)
+            }
+        } else {
+            Log.i("login", "UserRepository@tryCache, userFromCache = null")
+            _user.postValue(null)
+        }
     }
 
+    /**
+     * Tries to get user info from database.
+     * @return UserInfo from db | null
+     */
+    private suspend fun getUserFromCache(): UserInfo? {
+        Log.i("login", "UserRepository@getUserFromCache")
+        try {
+            val userFromDb = userInfoDao.getUser()
+            return if (userFromDb != null) {
+                UserInfo(
+                    userFromDb.name,
+                    userFromDb.email,
+                    userFromDb.token
+                )
+            } else {
+                Log.i("login", "UserRepository@getUserFromCache user from db = null")
+                null;
+            }
+        } catch (e: Exception) {
+            Log.i("login", "UserRepository@getUserFromCache, error: " + e.message.toString())
+            return null
+        }
+    }
+
+    /**
+     * Makes a request to web api to check if cached user info is valid.
+     * @return UserInfo from web api | null
+     */
+    private suspend fun tryTokenValidity(user: UserInfo): UserInfo? {
+        Log.i("login", "UserRepository@tryTokenValidity")
+        return try {
+            val userFromApi = apiService.getUser("Bearer " + user.accessToken)
+            UserInfo(
+                userFromApi.name,
+                userFromApi.email,
+                user.accessToken
+            )
+        } catch (e: Exception) {
+            Log.i("login", "UserRepository@tryTokenValidity, error: " + e.message.toString())
+            null
+        }
+    }
+
+    /**
+     * Makes a HTTP POST request to web api and if api responses with user, caches user info.
+     */
     suspend fun login(credentials: Credentials) {
         Log.i("login", "UserRepository@login")
-        withContext(Dispatchers.IO) {
-            try {
-                val loginResponseDto: LoginResponseDto = AWTApi.service.postLogin(credentials)
-                _user.postValue(UserInfo(
-                    loginResponseDto.user.name,
-                    loginResponseDto.user.email,
-                    loginResponseDto.access_token
-                ))
-                Log.i("login", "UserRepository, loginResponseDto.access_token: " + loginResponseDto.access_token)
-            } catch (e: Exception) {
-                Log.i("login", "UserRepository, error: " + e.message.toString())
-            }
+        try {
+            val loginResponseDto: LoginResponseDto = apiService.postLogin(credentials)
+            updateCachedUser(UserInfo(
+                loginResponseDto.user.name,
+                loginResponseDto.user.email,
+                loginResponseDto.access_token
+            ))
+            Log.i("login", "UserRepository, loginResponseDto.access_token: " + loginResponseDto.access_token)
+        } catch (e: Exception) {
+            Log.i("login", "UserRepository, error: " + e.message.toString())
+            _user.postValue(null)
         }
+    }
+
+    /**
+     * Updates user info in database and sets live data value
+     */
+    private suspend fun updateCachedUser(user: UserInfo) {
+        Log.i("login", "UserRepository@updateCachedUser")
+        try {
+            userInfoDao.upsertUser(
+                DatabaseUserInfo(
+                    name = user.name,
+                    email = user.email,
+                    token = user.accessToken
+                )
+            )
+            _user.postValue(user)
+        } catch (e: Exception) {
+            Log.i("login", "UserRepository@updateCachedUser, error: " + e.message.toString())
+            _user.postValue(null)
+        }
+    }
+
+    fun onGetUserComplete() {
+        _user.value = null
     }
 }

@@ -8,12 +8,17 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.R
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.AWTDatabase
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApi
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.databinding.LoginFragmentBinding
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.login.LoginViewModel
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.login.LoginViewModelFactory
 
 class LoginFragment : Fragment() {
 
@@ -29,14 +34,24 @@ class LoginFragment : Fragment() {
         binding = DataBindingUtil.inflate(inflater, R.layout.login_fragment, container, false)
         binding.lifecycleOwner = this
 
+        val application = requireNotNull(this.activity).application
+
         // initialize view model
-        viewModel = ViewModelProvider(this).get(LoginViewModel::class.java);
+        val viewModelFactory = LoginViewModelFactory(
+            AWTDatabase.getInstance(application).userDao,
+            AWTApi.service
+        )
+
+        viewModel = ViewModelProvider(this, viewModelFactory).get(LoginViewModel::class.java);
         binding.loginViewModel = viewModel
 
         // observe view model's live data
         viewModel.canContinue.observe(viewLifecycleOwner, Observer { canContinue ->
             if (canContinue) {
                 this.findNavController().navigate(R.id.action_loginFragment_to_mainFragment)
+                viewModel.onLoginComplete()
+            } else {
+                Toast.makeText(application, "Hups, jotain meni nyt pieleen. Ole hyvä, tarkista laitteen internetyhteys ja yritä uudestaan.", Toast.LENGTH_SHORT)
             }
         })
 

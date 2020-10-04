@@ -7,7 +7,7 @@
     <data>
         <variable
             name="loginViewModel"
-            type="com.awesomeworktimetracker2000.awesomeworktimetrackermobile.ui.login.LoginViewModel" />
+            type="com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.login.LoginViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
