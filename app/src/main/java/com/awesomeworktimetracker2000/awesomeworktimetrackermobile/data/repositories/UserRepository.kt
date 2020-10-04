@@ -3,13 +3,11 @@ package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.reposit
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.daos.UserInfoDao
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.entities.DatabaseUserInfo
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.UserInfo
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.Credentials
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.auth.LoginResponseDto
-import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApi
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApiService
 import kotlinx.coroutines.*
 import java.lang.Exception
@@ -25,7 +23,7 @@ class UserRepository(
         get() = _user
 
     /**
-     * Tries to fetch user info from db and then tries to validate it by making api request.
+     * Tries to fetch user info from db and validate it by making api request.
      * Updates live data.
      */
     suspend fun tryCache() {
@@ -76,36 +74,67 @@ class UserRepository(
 
     /**
      * Makes a request to web api to check if cached user info is valid.
+     * If user from db was not valid, removes cached user info.
      * @return UserInfo from web api | null
      */
-    private suspend fun tryTokenValidity(user: UserInfo): UserInfo? {
+    private suspend fun tryTokenValidity(user: UserInfo, firstTry: Boolean = true): UserInfo? {
         Log.i("login", "UserRepository@tryTokenValidity")
-        return try {
-            val userFromApi = apiService.getUser("Bearer " + user.accessToken)
-            UserInfo(
-                userFromApi.name,
-                userFromApi.email,
-                user.accessToken
-            )
+        try {
+            val response = apiService.getUser("Bearer " + user.accessToken)
+            when {
+                response.isSuccessful -> {
+                    val userFromApi = response.body()!!
+                    return UserInfo(
+                        userFromApi.name,
+                        userFromApi.email,
+                        user.accessToken
+                    )
+                }
+                response.code() == 401 -> {
+                    Log.i("login", "UserRepository@tryTokenValidity, response.code() == 401")
+                    userInfoDao.removeUser()
+                    return null
+                }
+                firstTry -> {
+                    delay(3000L)
+                    return tryTokenValidity(user, false)
+                }
+                else -> {
+                    return null
+                }
+            }
         } catch (e: Exception) {
             Log.i("login", "UserRepository@tryTokenValidity, error: " + e.message.toString())
-            null
+            userInfoDao.removeUser()
+            return null
         }
     }
 
     /**
      * Makes a HTTP POST request to web api and if api responses with user, caches user info.
      */
-    suspend fun login(credentials: Credentials) {
+    suspend fun login(credentials: Credentials, firstTry: Boolean = true) {
         Log.i("login", "UserRepository@login")
         try {
-            val loginResponseDto: LoginResponseDto = apiService.postLogin(credentials)
-            updateCachedUser(UserInfo(
-                loginResponseDto.user.name,
-                loginResponseDto.user.email,
-                loginResponseDto.access_token
-            ))
-            Log.i("login", "UserRepository, loginResponseDto.access_token: " + loginResponseDto.access_token)
+            val response = apiService.postLogin(credentials);
+            when {
+                response.isSuccessful -> {
+                    val loginResponseDto: LoginResponseDto = response.body()!!
+                    updateCachedUser(UserInfo(
+                        loginResponseDto.user.name,
+                        loginResponseDto.user.email,
+                        loginResponseDto.access_token
+                    ))
+                    Log.i("login", "UserRepository, loginResponseDto.user.name: " + loginResponseDto.user.name)
+                }
+                response.code() != 401 && firstTry -> {
+                    delay(3000L)
+                    login(credentials, false)
+                }
+                else -> {
+                    _user.postValue(null)
+                }
+            }
         } catch (e: Exception) {
             Log.i("login", "UserRepository, error: " + e.message.toString())
             _user.postValue(null)
