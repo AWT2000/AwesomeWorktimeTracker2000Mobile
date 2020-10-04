@@ -12,8 +12,7 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.databinding.S
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.R
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.startup.StartupViewModel
 
 class StartupFragment : Fragment() {
     private val LOG_TAG: String = "StartupFragment";

@@ -1,4 +1,4 @@
-package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.entities
+package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models
 
 class UserInfo(
     val name: String,
