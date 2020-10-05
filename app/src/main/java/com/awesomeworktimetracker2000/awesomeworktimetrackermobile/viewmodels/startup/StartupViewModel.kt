@@ -25,7 +25,7 @@ class StartupViewModel(private val userRepository: UserRepository) : ViewModel()
      * Updates live data.
      */
     fun tryLoginWithCache() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             userRepository.tryCache()
         }
     }
