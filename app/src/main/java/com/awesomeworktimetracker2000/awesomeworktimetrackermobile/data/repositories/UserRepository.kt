@@ -12,10 +12,23 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.
 import kotlinx.coroutines.*
 import java.lang.Exception
 
-class UserRepository(
+class UserRepository private constructor(
     private val userInfoDao: UserInfoDao,
     private val apiService: AWTApiService
 ) {
+
+    companion object {
+        private lateinit var instance: UserRepository
+
+        fun getInstance(userInfoDao: UserInfoDao, apiService: AWTApiService): UserRepository {
+            synchronized(this) {
+                if (!::instance.isInitialized) {
+                    instance = UserRepository(userInfoDao, apiService)
+                }
+                return instance
+            }
+        }
+    }
 
     private val _user = MutableLiveData<UserInfo?>()
 

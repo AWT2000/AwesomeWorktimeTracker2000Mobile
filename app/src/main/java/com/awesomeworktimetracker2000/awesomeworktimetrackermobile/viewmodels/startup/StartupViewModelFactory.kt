@@ -13,7 +13,7 @@ class StartupViewModelFactory(
 ): ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(StartupViewModel::class.java)) {
-            return StartupViewModel(UserRepository(userInfoDao, apiService)) as T
+            return StartupViewModel(UserRepository.getInstance(userInfoDao, apiService)) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

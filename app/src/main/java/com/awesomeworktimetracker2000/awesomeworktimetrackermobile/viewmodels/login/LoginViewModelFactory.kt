@@ -13,7 +13,7 @@ class LoginViewModelFactory(
 ): ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
-            return LoginViewModel(UserRepository(userInfoDao, apiService)) as T
+            return LoginViewModel(UserRepository.getInstance(userInfoDao, apiService)) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
