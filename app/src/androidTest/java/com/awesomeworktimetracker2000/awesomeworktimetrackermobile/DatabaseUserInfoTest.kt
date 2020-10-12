@@ -45,7 +45,8 @@ class DatabaseUserInfoTest {
         val userInfo = DatabaseUserInfo(
             "user@example.com",
             "User",
-            "access_token"
+            "access_token",
+            0
         )
 
         runBlocking {
@@ -64,9 +65,10 @@ class DatabaseUserInfoTest {
     @Throws(Exception::class)
     fun updateUser() {
         val userInfo = DatabaseUserInfo(
-            "user@example.com",
-            "User",
-            "access_token"
+            email ="user@example.com",
+            name = "User",
+            token = "access_token",
+            id = 0
         )
 
         runBlocking {
@@ -76,7 +78,8 @@ class DatabaseUserInfoTest {
                 DatabaseUserInfo(
                     "user@example.com",
                     "another name",
-                    "access_token"
+                    "access_token",
+                    0
                 )
             )
 
