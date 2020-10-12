@@ -2,11 +2,8 @@ package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.l
 
 import android.util.Log
 import androidx.lifecycle.*
-import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.AWTDatabase
-import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.daos.UserInfoDao
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.UserInfo
-import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.Credentials
-import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApi
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.auth.Credentials
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,7 +28,12 @@ class LoginViewModel(private val userRepository: UserRepository) : ViewModel() {
     fun tryLogin(email: String, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
             Log.i("login", "LoginViewModel@tryLogin")
-            userRepository.login(Credentials(email, password))
+            userRepository.login(
+                Credentials(
+                    email,
+                    password
+                )
+            )
         }
     }
 

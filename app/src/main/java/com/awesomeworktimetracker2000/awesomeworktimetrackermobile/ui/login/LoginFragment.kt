@@ -52,6 +52,7 @@ class LoginFragment : Fragment() {
                 viewModel.onLoginComplete()
             } else {
                 Toast.makeText(application, "Hups, jotain meni nyt pieleen. Ole hyvä, tarkista laitteen internetyhteys ja yritä uudestaan.", Toast.LENGTH_SHORT)
+                    .show()
             }
         })
 
