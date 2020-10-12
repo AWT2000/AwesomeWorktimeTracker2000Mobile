@@ -19,6 +19,7 @@ import org.junit.Assert.assertEquals
 import org.junit.runner.RunWith
 import java.time.OffsetDateTime
 import java.time.OffsetTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 @RunWith(AndroidJUnit4::class)
@@ -26,7 +27,7 @@ class DatabaseWorktimeEntryTest {
     private lateinit var worktimeEntryDao: WorktimeEntryDao
     private lateinit var awtDatabase: AWTDatabase
 
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssxxx")
 
     private val projects = listOf<DatabaseProject>(
         DatabaseProject(
@@ -215,5 +216,14 @@ class DatabaseWorktimeEntryTest {
             assertEquals(true, updatedEntry?.synced)
             assertEquals(5, updatedEntry?.externalId)
         }
+    }
+
+    @Test
+    fun testFormatting() {
+        val dateString = "2020-01-01T06:00:00+00:00";
+
+        val dateObject = OffsetDateTime.parse(dateString).withOffsetSameInstant(ZoneOffset.UTC)
+
+        assertEquals(dateString, dateObject.format(formatter))
     }
 }

@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.daos.UserInfoDao
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.entities.DatabaseUserInfo
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.UserInfo
-import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.Credentials
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.auth.Credentials
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.auth.LoginResponseDto
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApiService
 import kotlinx.coroutines.*
