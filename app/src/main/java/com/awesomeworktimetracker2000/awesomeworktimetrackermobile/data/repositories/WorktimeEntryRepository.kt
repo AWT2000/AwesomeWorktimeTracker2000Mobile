@@ -85,7 +85,7 @@ class WorktimeEntryRepository private constructor (
         val end = localDate.plusDays(1).atTime(OffsetTime.MIN).toString()
 
         return if (connectionUtils.hasInternetConnection()) {
-            syncWorktimeEntriesBetweenDateTimes(start, end)
+            syncWorktimeEntriesBetweenDateTimes(date, start, end)
         } else {
             getCachedWorktimeEntriesBetweenDateTimes(start, end)
         }
@@ -128,11 +128,13 @@ class WorktimeEntryRepository private constructor (
      *
      * @return WorktimeEntryListing with list of entries and response status
      */
-    private suspend fun syncWorktimeEntriesBetweenDateTimes(start: String, end: String): WorktimeEntryListing {
+    private suspend fun syncWorktimeEntriesBetweenDateTimes(date: Date, start: String, end: String): WorktimeEntryListing {
         Log.i("worktimeEntries", "Bearer $token")
 
         val response = apiService
-            .getWorktimeEntries("Bearer $token", start, end)
+            .getWorktimeEntries("Bearer $token",
+                simpleDateFormatter.format(date),
+                simpleDateFormatter.format(date))
 
         if (response.isSuccessful) {
             response.body()?.let {
