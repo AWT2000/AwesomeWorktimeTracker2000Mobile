@@ -1,20 +1,15 @@
 package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories
 
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.daos.UserInfoDao
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.daos.WorktimeEntryDao
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.entities.DatabaseWorktimeEntry
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.WorktimeEntry
-import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.worktimeEntries.SaveWorktimeEntryRequest
-import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.worktimeEntries.save.SaveWorktimeEntryResponseDto
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApiService
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.ResponseStatus
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.WorktimeEntryListing
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.ConnectionUtils
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.localOffset
-import org.json.JSONObject
-import retrofit2.Response
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
@@ -22,6 +17,9 @@ import java.time.OffsetTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
+/**
+ * Repository for work time entries.
+ */
 class WorktimeEntryRepository private constructor (
     private val apiService: AWTApiService,
     private val worktimeEntryDao: WorktimeEntryDao,
@@ -266,11 +264,15 @@ class WorktimeEntryRepository private constructor (
 //        }
 //    }
 
+    /**
+     * Checks if entry already exists, and adds or updates entry to db.
+     *
+     * @param entry work time entry to add or update.
+     */
     private suspend fun addEntryToDb(entry: WorktimeEntry): WorktimeEntry {
         val existingEntry = worktimeEntryDao.getWorktimeEntryByExternalId(userId, entry.externalId!!)
         if (existingEntry != null) {
-            return updateEntryToDb(
-                DatabaseWorktimeEntry(
+            return updateEntryToDb(DatabaseWorktimeEntry(
                     id = existingEntry.id,
                     userId = userId,
                     startedAt = entry.startedAt,

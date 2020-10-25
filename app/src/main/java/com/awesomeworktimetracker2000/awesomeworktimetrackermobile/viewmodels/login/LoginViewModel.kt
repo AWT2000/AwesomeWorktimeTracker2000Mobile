@@ -5,35 +5,44 @@ import androidx.lifecycle.*
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.UserInfo
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.auth.Credentials
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.UserRepository
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.ResponseStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class LoginViewModel(private val userRepository: UserRepository) : ViewModel() {
 
-    private val userInfo: LiveData<UserInfo?>
-        get() = userRepository.user
-
-    val canContinue = Transformations.map(userInfo) {
-        it != null
-    }
-
     private val _loginButtonEnabled = MutableLiveData<Boolean?>()
 
+    /**
+     * Boolean flag indicating if we should enable login button.
+     */
     val loginButtonEnabled: LiveData<Boolean?>
         get() = _loginButtonEnabled
 
+    private val _responseStatus = MutableLiveData<ResponseStatus?>()
+
     /**
-     * Launches coroutine that makes HTTP POST request to web API
+     * Response status from login request.
+     *
+     * Returns: ResponseStatus.OK|ResponseStatus.UNAUTHORIZED|ResponseStatus.UNDEFINEDERROR
+     */
+    val responseStatus: LiveData<ResponseStatus?>
+        get() = _responseStatus
+
+    /**
+     * Launches coroutine that makes HTTP POST request to web API. Updates response status live data.
      */
     fun tryLogin(email: String, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
             Log.i("login", "LoginViewModel@tryLogin")
-            userRepository.login(
+            val loginResponse = userRepository.login(
                 Credentials(
                     email,
                     password
                 )
             )
+
+            _responseStatus.postValue(loginResponse.status)
         }
     }
 
