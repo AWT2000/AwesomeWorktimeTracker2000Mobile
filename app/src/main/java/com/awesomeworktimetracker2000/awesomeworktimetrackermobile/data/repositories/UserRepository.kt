@@ -71,9 +71,10 @@ class UserRepository private constructor(
             val userFromDb = userInfoDao.getUser()
             return if (userFromDb != null) {
                 UserInfo(
-                    userFromDb.name,
-                    userFromDb.email,
-                    userFromDb.token
+                    name = userFromDb.name,
+                    email = userFromDb.email,
+                    accessToken = userFromDb.token,
+                    id = userFromDb.id
                 )
             } else {
                 Log.i("login", "UserRepository@getUserFromCache user from db = null")
@@ -98,9 +99,10 @@ class UserRepository private constructor(
                 response.isSuccessful -> {
                     val userFromApi = response.body()!!
                     return UserInfo(
-                        userFromApi.name,
-                        userFromApi.email,
-                        user.accessToken
+                        name = userFromApi.name,
+                        email = userFromApi.email,
+                        accessToken = user.accessToken,
+                        id = userFromApi.id
                     )
                 }
                 response.code() == 401 -> {
@@ -134,9 +136,10 @@ class UserRepository private constructor(
                 response.isSuccessful -> {
                     val loginResponseDto: LoginResponseDto = response.body()!!
                     updateCachedUser(UserInfo(
-                        loginResponseDto.user.name,
-                        loginResponseDto.user.email,
-                        loginResponseDto.access_token
+                        name = loginResponseDto.user.name,
+                        email = loginResponseDto.user.email,
+                        accessToken = loginResponseDto.access_token,
+                        id = loginResponseDto.user.id
                     ))
                     Log.i("login", "UserRepository, loginResponseDto.user.name: " + loginResponseDto.user.name)
                 }
@@ -164,7 +167,8 @@ class UserRepository private constructor(
                 DatabaseUserInfo(
                     name = user.name,
                     email = user.email,
-                    token = user.accessToken
+                    token = user.accessToken,
+                    id = user.id
                 )
             )
             _user.postValue(user)

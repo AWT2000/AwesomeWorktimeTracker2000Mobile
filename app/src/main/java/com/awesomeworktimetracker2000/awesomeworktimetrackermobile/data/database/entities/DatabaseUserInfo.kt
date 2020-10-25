@@ -14,7 +14,9 @@ data class DatabaseUserInfo constructor(
     @ColumnInfo(name = "name")
     val name: String,
     @ColumnInfo(name = "token")
-    val token: String
+    val token: String,
+    @ColumnInfo(name = "external_user_id")
+    val id: Int
 )
 
 //fun DatabaseUserInfo.asDomainModel(): UserInfo {

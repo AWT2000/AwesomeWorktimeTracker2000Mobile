@@ -8,21 +8,24 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database
 
 @Dao
 interface WorktimeEntryDao {
-    @Query("SELECT * FROM worktime_entries WHERE (started_at >= :start AND ended_at <= :end) OR (started_at < :start AND ended_at > :start) OR (started_at < :end AND ended_at > :end)")
-    suspend fun getWorktimeEntriesByDate(start: String, end: String): List<DatabaseWorktimeEntry>
+    @Query("SELECT * FROM worktime_entries WHERE user_id = :userId AND (started_at >= :start AND ended_at <= :end) OR (started_at < :start AND ended_at > :start) OR (started_at < :end AND ended_at > :end)")
+    suspend fun getWorktimeEntriesBetweenDates(userId: Int, start: String, end: String): List<DatabaseWorktimeEntry>
 
-    @Query("SELECT * FROM worktime_entries WHERE ((started_at >= :start AND ended_at <= :end) OR (started_at < :start AND ended_at > :start) OR (started_at < :end AND ended_at > :end)) AND project_id = :projectId")
-    suspend fun getWorktimeEntriesByDateAndProject(start: String, end: String, projectId: Int): List<DatabaseWorktimeEntry>
+    @Query("SELECT * FROM worktime_entries WHERE user_id = :userId AND ((started_at >= :start AND ended_at <= :end) OR (started_at < :start AND ended_at > :start) OR (started_at < :end AND ended_at > :end)) AND project_id = :projectId")
+    suspend fun getWorktimeEntriesBetweenDatesByProject(userId: Int, start: String, end: String, projectId: Int): List<DatabaseWorktimeEntry>
 
-    @Query("SELECT * FROM worktime_entries WHERE external_id = :externalId")
-    suspend fun getWorktimeEntryByExternalId(externalId: Int): DatabaseWorktimeEntry?
+    @Query("SELECT * FROM worktime_entries WHERE user_id = :userId AND external_id = :externalId")
+    suspend fun getWorktimeEntryByExternalId(userId: Int, externalId: Int): DatabaseWorktimeEntry?
 
-    @Query("SELECT * FROM worktime_entries WHERE synced = 0")
-    suspend fun getUnsyncedWorktimeEntries(): List<DatabaseWorktimeEntry>
+    @Query("SELECT * FROM worktime_entries WHERE user_id = :userId AND synced = 0")
+    suspend fun getUnsyncedWorktimeEntries(userId: Int): List<DatabaseWorktimeEntry>
 
     @Insert
-    suspend fun addWorktimeEntry(worktimeEntry: DatabaseWorktimeEntry)
+    suspend fun addWorktimeEntry(worktimeEntry: DatabaseWorktimeEntry): Long
 
     @Update
     suspend fun updateWorktimeEntry(worktimeEntry: DatabaseWorktimeEntry)
+
+    @Query("DELETE FROM worktime_entries WHERE user_id = :userId AND started_at >= :start AND ended_at <= :end")
+    suspend fun clearWorktimeEntriesBetweenDates(userId: Int, start: String, end: String)
 }

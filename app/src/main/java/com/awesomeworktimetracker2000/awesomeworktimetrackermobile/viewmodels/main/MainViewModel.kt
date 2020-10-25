@@ -1,4 +1,4 @@
-package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.ui.main
+package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.main
 
 import androidx.lifecycle.ViewModel
 

@@ -16,6 +16,7 @@ import org.junit.Test
 import java.io.IOException
 import java.lang.Exception
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.runner.RunWith
 import java.time.OffsetDateTime
 import java.time.OffsetTime
@@ -93,49 +94,61 @@ class DatabaseWorktimeEntryTest {
 
     private val worktimeEntries = listOf<DatabaseWorktimeEntry>(
         DatabaseWorktimeEntry(
-                0,
+            0,
+            0,
             OffsetDateTime.parse("2020-01-01T09:00:00+02:00"),
             OffsetDateTime.parse("2020-01-01T12:00:00+02:00"),
+            null,
             projects[0].id,
             null,
             false
         ),
         DatabaseWorktimeEntry(
             0,
+            0,
             OffsetDateTime.parse("2020-01-01T12:30:00+02:00"),
             OffsetDateTime.parse("2020-01-01T15:00:00+02:00"),
+            null,
             projects[1].id,
             null,
             false
         ),
         DatabaseWorktimeEntry(
             0,
+            0,
             OffsetDateTime.parse("2020-01-01T15:00:00+02:00"),
             OffsetDateTime.parse("2020-01-01T17:00:00+02:00"),
+            null,
             projects[2].id,
             null,
             false
         ),
         DatabaseWorktimeEntry(
             0,
+            0,
             OffsetDateTime.parse("2020-01-02T09:00:00+02:00"),
             OffsetDateTime.parse("2020-01-02T12:00:00+02:00"),
+            null,
             projects[0].id,
             null,
             false
         ),
         DatabaseWorktimeEntry(
             0,
+            0,
             OffsetDateTime.parse("2020-01-02T12:30:00+02:00"),
             OffsetDateTime.parse("2020-01-02T15:00:00+02:00"),
+            null,
             projects[1].id,
             null,
             false
         ),
         DatabaseWorktimeEntry(
             0,
+            0,
             OffsetDateTime.parse("2020-01-02T15:00:00+02:00"),
             OffsetDateTime.parse("2020-01-02T17:00:00+02:00"),
+            null,
             projects[2].id,
             null,
             false
@@ -152,7 +165,8 @@ class DatabaseWorktimeEntryTest {
 
             val date = entry.startedAt.toLocalDate()
 
-            val entriesFromDb = worktimeEntryDao.getWorktimeEntriesByDate(
+            val entriesFromDb = worktimeEntryDao.getWorktimeEntriesBetweenDates(
+                userId = 0,
                 start = date.atTime(OffsetTime.MIN).toString(),
                 end = date.plusDays(1).atTime(OffsetTime.MIN).toString())
 
@@ -172,7 +186,8 @@ class DatabaseWorktimeEntryTest {
 
             val date = worktimeEntries[0].startedAt.toLocalDate()
 
-            val entriesFromDb = worktimeEntryDao.getWorktimeEntriesByDate(
+            val entriesFromDb = worktimeEntryDao.getWorktimeEntriesBetweenDates(
+                userId = 0,
                 start = date.atTime(OffsetTime.MIN).toString(),
                 end = date.plusDays(1).atTime(OffsetTime.MIN).toString())
 
@@ -193,22 +208,25 @@ class DatabaseWorktimeEntryTest {
 
             val date = entry.startedAt.toLocalDate()
 
-            val entriesFromDb = worktimeEntryDao.getWorktimeEntriesByDate(
+            val entriesFromDb = worktimeEntryDao.getWorktimeEntriesBetweenDates(
+                userId = 0,
                 start = date.atTime(OffsetTime.MIN).toString(),
                 end = date.plusDays(1).atTime(OffsetTime.MIN).toString())
 
             val entryToUpdate = DatabaseWorktimeEntry(
                 id = entriesFromDb[0].id,
+                userId = 0,
                 startedAt = OffsetDateTime.parse("2020-01-02T12:30:00+02:00"),
                 endedAt = OffsetDateTime.parse("2020-01-02T15:00:00+02:00"),
                 projectId = projects[1].id,
                 externalId = 5,
-                synced = true
+                synced = true,
+                syncedAt = OffsetDateTime.now()
             )
 
             worktimeEntryDao.updateWorktimeEntry(entryToUpdate)
 
-            val updatedEntry = worktimeEntryDao.getWorktimeEntryByExternalId(5)
+            val updatedEntry = worktimeEntryDao.getWorktimeEntryByExternalId(userId = 0, externalId = 5)
 
             Assert.assertNotNull(updatedEntry)
             assertEquals("2020-01-02T12:30:00+02:00", formatter.format(updatedEntry?.startedAt))
@@ -225,5 +243,132 @@ class DatabaseWorktimeEntryTest {
         val dateObject = OffsetDateTime.parse(dateString).withOffsetSameInstant(ZoneOffset.UTC)
 
         assertEquals(dateString, dateObject.format(formatter))
+    }
+
+    @Test
+    fun clearEntriesBetweenDates() {
+        runBlocking {
+            // entry that should be not deleted
+            worktimeEntryDao.addWorktimeEntry(
+                DatabaseWorktimeEntry(
+                    0,
+                    0,
+                    OffsetDateTime.parse("2020-01-02T12:00:00+02:00"),
+                    OffsetDateTime.parse("2020-01-02T15:00:00+02:00"),
+                    null,
+                    projects[2].id,
+                    1,
+                    false
+                )
+            )
+
+            // entry that should be deleted
+            worktimeEntryDao.addWorktimeEntry(
+                DatabaseWorktimeEntry(
+                    0,
+                    0,
+                    OffsetDateTime.parse("2020-01-03T12:00:00+02:00"),
+                    OffsetDateTime.parse("2020-01-03T15:00:00+02:00"),
+                    null,
+                    projects[2].id,
+                    2,
+                    false
+                )
+            )
+
+            // entry that should be deleted
+            worktimeEntryDao.addWorktimeEntry(
+                DatabaseWorktimeEntry(
+                    0,
+                    0,
+                    OffsetDateTime.parse("2020-01-03T15:00:00+02:00"),
+                    OffsetDateTime.parse("2020-01-03T17:00:00+02:00"),
+                    null,
+                    projects[2].id,
+                    3,
+                    false
+                )
+            )
+
+            // entry that should be not deleted
+            worktimeEntryDao.addWorktimeEntry(
+                DatabaseWorktimeEntry(
+                    0,
+                    0,
+                    OffsetDateTime.parse("2020-01-04T12:00:00+02:00"),
+                    OffsetDateTime.parse("2020-01-04T15:00:00+02:00"),
+                    null,
+                    projects[2].id,
+                    4,
+                    false
+                )
+            )
+
+            worktimeEntryDao.clearWorktimeEntriesBetweenDates(
+                userId = 0,
+                start = "2020-01-03T00:00:00+00:00",
+                end = "2020-01-04T00:00:00+00:00")
+
+            assertNotNull(worktimeEntryDao.getWorktimeEntryByExternalId(userId = 0, externalId = 1))
+            assertNotNull(worktimeEntryDao.getWorktimeEntryByExternalId(userId = 0, externalId = 4))
+            assertEquals(null, worktimeEntryDao.getWorktimeEntryByExternalId(userId = 0, externalId = 2))
+            assertEquals(null, worktimeEntryDao.getWorktimeEntryByExternalId(userId = 0, externalId = 3))
+        }
+    }
+
+    @Test
+    fun itClearEntriesBetweenDateTimesStrictly() {
+        runBlocking {
+            // entry that should be not deleted
+            worktimeEntryDao.addWorktimeEntry(
+                DatabaseWorktimeEntry(
+                    0,
+                    0,
+                    OffsetDateTime.parse("2020-01-02T19:00:00+00:00"),
+                    OffsetDateTime.parse("2020-01-03T01:00:00+00:00"),
+                    null,
+                    projects[2].id,
+                    1,
+                    false
+                )
+            )
+
+            // entry that should be deleted
+            worktimeEntryDao.addWorktimeEntry(
+                DatabaseWorktimeEntry(
+                    0,
+                    0,
+                    OffsetDateTime.parse("2020-01-03T12:00:00+00:00"),
+                    OffsetDateTime.parse("2020-01-03T15:00:00+00:00"),
+                    null,
+                    projects[2].id,
+                    2,
+                    false
+                )
+            )
+
+            // entry that should be deleted
+            worktimeEntryDao.addWorktimeEntry(
+                DatabaseWorktimeEntry(
+                    0,
+                    0,
+                    OffsetDateTime.parse("2020-01-03T23:00:00+00:00"),
+                    OffsetDateTime.parse("2020-01-04T04:00:00+00:00"),
+                    null,
+                    projects[2].id,
+                    3,
+                    false
+                )
+            )
+
+            worktimeEntryDao.clearWorktimeEntriesBetweenDates(
+                userId = 0,
+                start = "2020-01-03T00:00:00+00:00",
+                end = "2020-01-04T00:00:00+00:00")
+
+            assertNotNull(worktimeEntryDao.getWorktimeEntryByExternalId(userId = 0, externalId = 1))
+            assertNotNull(worktimeEntryDao.getWorktimeEntryByExternalId(userId = 0, externalId = 3))
+            assertEquals(null, worktimeEntryDao.getWorktimeEntryByExternalId(userId = 0, externalId = 2))
+        }
     }
 }
