@@ -4,4 +4,6 @@
     <string name="user_name">Käyttäjätunnus</string>
     <string name="password">Salasana</string>
     <string name="button_login_label">Kirjaudu</string>
+    <string name="toast_login_invalid_credentials">Sähköpostiosoite ja/tai salasana eivät täsmää. Tarkista syöttämäsi tiedot.</string>
+    <string name="toast_login_something_went_wrong">Hups, jotain meni nyt pieleen. Ole hyvä, tarkista laitteen internetyhteys ja yritä uudestaan.</string>
 </resources>

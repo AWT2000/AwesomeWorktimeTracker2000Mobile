@@ -14,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.R
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.AWTDatabase
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApi
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.ConnectionUtils
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.startup.StartupViewModel
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.startup.StartupViewModelFactory
 
@@ -36,7 +37,8 @@ class StartupFragment : Fragment() {
         // initialize view model
         val viewModelFactory = StartupViewModelFactory(
             AWTDatabase.getInstance(application).userDao,
-            AWTApi.service
+            AWTApi.service,
+            ConnectionUtils.getInstance(application)
         )
         viewModel = ViewModelProvider(this, viewModelFactory).get(StartupViewModel::class.java)
 
@@ -48,6 +50,8 @@ class StartupFragment : Fragment() {
                 this.findNavController().navigate(R.id.action_startupFragment_to_loginFragment)
             }
         })
+
+        // TODO: start coroutine that will sync work time entries
 
         viewModel.tryLoginWithCache()
 
