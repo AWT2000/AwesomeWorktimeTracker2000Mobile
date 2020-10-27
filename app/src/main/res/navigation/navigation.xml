@@ -34,5 +34,23 @@
         android:id="@+id/mainFragment"
         android:name="com.awesomeworktimetracker2000.awesomeworktimetrackermobile.ui.main.MainFragment"
         android:label="main_fragment"
-        tools:layout="@layout/main_fragment" />
+        tools:layout="@layout/main_fragment" >
+        <action
+            android:id="@+id/action_mainFragment_to_weekFragment"
+            app:destination="@id/weekFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/weekFragment"
+        android:name="com.awesomeworktimetracker2000.awesomeworktimetrackermobile.ui.week.WeekFragment"
+        android:label="week_Fragment"
+        tools:layout="@layout/week_fragment">
+        <action
+            android:id="@+id/action_weekFragment_to_dateFragment"
+            app:destination="@id/dateFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/dateFragment"
+        android:name="com.awesomeworktimetracker2000.awesomeworktimetrackermobile.ui.date.DateFragment"
+        android:label="date_Fragment"
+        tools:layout="@layout/date_fragment"/>
 </navigation>
