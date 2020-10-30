@@ -10,6 +10,9 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.reposito
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.WorktimeEntryListing
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.ConnectionUtils
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.localOffset
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
@@ -41,17 +44,13 @@ class WorktimeEntryRepository private constructor (
             userInfoDao: UserInfoDao,
             connectionUtils: ConnectionUtils): WorktimeEntryRepository {
 
-            if (!::token.isInitialized) {
-                val user = userInfoDao.getUser()!!
-                synchronized(this) {
-                    if (!::token.isInitialized) {
-                        token = user.token
-                    }
+            Mutex().withLock {
+                if (!::token.isInitialized) {
+                    val user = userInfoDao.getUser()!!
+                    token = user.token
                     userId = user.id
                 }
-            }
 
-            synchronized(this) {
                 if (!::instance.isInitialized) {
                     instance = WorktimeEntryRepository(
                         apiService,
@@ -59,6 +58,7 @@ class WorktimeEntryRepository private constructor (
                         token,
                         connectionUtils)
                 }
+
                 return instance
             }
         }
