@@ -33,7 +33,7 @@ class DateViewModel(private val worktimeEntryRepository: WorktimeEntryRepository
 
     init {
         Log.i("DateViewModel", "DateViewModel created")
-        // Placeholder until date gets passed from week vm
+        // Placeholder until getWorkTimeEntries gets called from week
         getWorkTimeEntries(date)
     }
 
