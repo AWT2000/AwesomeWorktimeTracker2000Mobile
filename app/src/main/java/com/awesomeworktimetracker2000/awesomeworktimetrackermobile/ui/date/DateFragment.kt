@@ -18,11 +18,14 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUti
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.date.DateViewModel
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.date.DateViewModelFactory
 import kotlinx.android.synthetic.main.date_fragment.*
+import java.text.SimpleDateFormat
 
 
 class DateFragment : Fragment() {
 
     private lateinit var binding: DateFragmentBinding
+
+    private lateinit var dateViewmModel: DateViewModel
 
     companion object {
         fun newInstance() = DateFragment()
@@ -46,16 +49,16 @@ class DateFragment : Fragment() {
         val application = requireNotNull(this.activity).application
 
         // initialize view model
-        val vmf = DateViewModelFactory(
+        val dateViewModelFactory = DateViewModelFactory(
             AWTDatabase.getInstance(application).worktimeEntryDao,
             AWTDatabase.getInstance(application).userDao,
             AWTApi.service,
             ConnectionUtils.getInstance(application)
         )
 
-        val vm = ViewModelProvider(this, vmf).get(DateViewModel::class.java)
+        dateViewmModel = ViewModelProvider(this, dateViewModelFactory).get(DateViewModel::class.java)
 
-        vm.worktimeEntries.observe(viewLifecycleOwner, Observer {
+        dateViewmModel.worktimeEntries.observe(viewLifecycleOwner, Observer {
             it.forEach { entry ->
                 Log.i("worktimeEntries", "external id: ${entry.externalId}, started_at: "
                         + "${entry.startedAt.format(DateUtils.isoDateFormatter)}, "
@@ -64,16 +67,18 @@ class DateFragment : Fragment() {
         })
 
         // Observe currentDate in DateViewModel and update tvDate.text accordingly
-        vm.currentDate.observe(viewLifecycleOwner, Observer {
-            this.tvDate.text = vm.currentDate.value.toString()
+        dateViewmModel.currentDateString.observe(viewLifecycleOwner, Observer {
+            this.tvDate.text = dateViewmModel.currentDateString.value.toString()
         })
 
         binding.btnNextDate.setOnClickListener {
-            vm.nextDate()
+            dateViewmModel.nextDate()
         }
         binding.btnPrevDate.setOnClickListener {
-            vm.prevDate()
+            dateViewmModel.prevDate()
         }
+
+        dateViewmModel.getWorkTimeEntries(SimpleDateFormat("yyyy-MM-dd").parse("2020-10-05"))
 
         return binding.root
     }
