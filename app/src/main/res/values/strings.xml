@@ -16,5 +16,8 @@
     <string name="week">Viikko %1$s</string>
     <string name="dates_between">Päivämäärä</string>
     <string name="date">Päivämäärä</string>
+    <string name="project">Projekti</string>
+    <string name="save">Tallenna</string>
+    <string name="delete">Poista</string>
 
 </resources>
