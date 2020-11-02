@@ -9,6 +9,7 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.ResponseStatus
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.WorktimeEntryListing
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.ConnectionUtils
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.localOffset
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -78,7 +79,7 @@ class WorktimeEntryRepository private constructor (
      * @return WorktimeEntryListing with list of entries and response status
      */
     suspend fun getWorktimeEntriesByDate(date: Date = Date()): WorktimeEntryListing {
-        val localDate = date.toInstant().atOffset(localOffset).toLocalDate()
+        val localDate = date.toInstant().atZone(DateUtils.ZoneId).toLocalDate()
         val start = localDate.atTime(OffsetTime.MIN).toString()
         val end = localDate.plusDays(1).atTime(OffsetTime.MIN).toString()
 
@@ -128,6 +129,8 @@ class WorktimeEntryRepository private constructor (
      */
     private suspend fun syncWorktimeEntriesBetweenDateTimes(date: Date, start: String, end: String): WorktimeEntryListing {
         Log.i("worktimeEntries", "Bearer $token")
+
+        Log.i("worktimeEntries", "start: $start, end: $end")
 
         val response = apiService
             .getWorktimeEntries("Bearer $token",
