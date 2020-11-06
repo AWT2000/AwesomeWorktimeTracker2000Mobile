@@ -98,7 +98,7 @@ class WorktimeEntryRepository private constructor (
      *
      * @return WorktimeEntryListing with list of entries and response status
      */
-    private suspend fun getCachedWorktimeEntriesBetweenDateTimes(start: String, end: String): WorktimeEntryListing {
+    suspend fun getCachedWorktimeEntriesBetweenDateTimes(start: String, end: String): WorktimeEntryListing {
         return try {
             WorktimeEntryListing(
                 status = ResponseStatus.OFFLINE,
