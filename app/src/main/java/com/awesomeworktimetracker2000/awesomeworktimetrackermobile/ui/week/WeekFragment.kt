@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.R
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.AWTDatabase
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.WorktimeEntry
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApi
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.databinding.WeekFragmentBinding
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.ConnectionUtils
@@ -48,6 +49,7 @@ class WeekFragment : Fragment() {
     ): View? {
         // initialize data binding
         binding = DataBindingUtil.inflate(inflater, R.layout.week_fragment, container, false)
+
         binding.lifecycleOwner = this
 
         val application = requireNotNull(this.activity).application
@@ -59,32 +61,8 @@ class WeekFragment : Fragment() {
             AWTApi.service,
             ConnectionUtils.getInstance(application)
         )
-        /**
-         * Get selected date as String and pass that as an argument when navigating to DateFragment
-         * requires safeargs enabled in build.gradle
-         */
-        fun goToDate(view : View) {
-            lateinit var selectedDate : String
-            when (view) {
-                binding.btnMonday -> selectedDate = weekViewModel.getDate(1)
-                binding.btnTuesday -> selectedDate = weekViewModel.getDate(2)
-                binding.btnWednesday -> selectedDate = weekViewModel.getDate(3)
-                binding.btnThursday -> selectedDate = weekViewModel.getDate(4)
-                binding.btnFriday -> selectedDate = weekViewModel.getDate(5)
-                binding.btnSaturday-> selectedDate = weekViewModel.getDate(6)
-                binding.btnSunday -> selectedDate = weekViewModel.getDate(7)
-            else -> {
-                Log.i("selectedDate", "Failed to get selected date")
-            }
-            }
-            val action = WeekFragmentDirections.actionWeekFragmentToDateFragment(selectedDate)
-            this.findNavController().navigate(action)
-            Log.i("weekday", selectedDate.toString())
-
-        }
 
         weekViewModel = ViewModelProvider(this, weekViewModelFactory).get(WeekViewModel::class.java)
-
 
         weekViewModel.getCachedWorkTimeEntries(weekViewModel.firstDayOfCurrentWeek, weekViewModel.lastDayOfCurrentWeek)
 
@@ -98,52 +76,81 @@ class WeekFragment : Fragment() {
             this.tvDatesBetween.text = weekViewModel.datesBetween.value.toString()
         })
 
-        /**
-         * observe current weeks worktimeEntries,
-         * change color of the corresponding day button if that day has existing entries
-         * @weekDay = iterate weekdays from monday to sunday
-         * @entrydate = date that has a worktimeEntry
-          */
+        // observe current weeks worktimeEntries,
+        // change color of the corresponding day button if that day has existing entries
         weekViewModel.worktimeEntries.observe(viewLifecycleOwner, Observer {
-            for (i in 1..7) {
-                val weekDay : String = weekViewModel.getDate(i)
-                it.forEach { entry ->
-                    val entryDate : String = entry.startedAt.format(weekViewModel.dateTimeFormat2)
-                    if (weekDay.equals(entryDate)) {
-                        if (i == 1) binding.btnMonday.setBackgroundColor(Color.parseColor(color))
-                        if (i == 2) binding.btnTuesday.setBackgroundColor(Color.parseColor(color))
-                        if (i == 3) binding.btnWednesday.setBackgroundColor(Color.parseColor(color))
-                        if (i == 4) binding.btnThursday.setBackgroundColor(Color.parseColor(color))
-                        if (i == 5) binding.btnFriday.setBackgroundColor(Color.parseColor(color))
-                        if (i == 6) binding.btnSaturday.setBackgroundColor(Color.parseColor(color))
-                        if (i == 7) binding.btnSunday.setBackgroundColor(Color.parseColor(color))
-                    }
-                    Log.i("entryDate", entryDate)
-                }
-            }
+            setButtonColors(it)
         })
 
-        // TODO: use backgroundTint instead of color to not lose animations etc.
-        //  make some sort of theme/style? and update colors and whatnot based on that?
-        //
-        fun setDefaultButtonColor() {
-            binding.btnMonday.setBackgroundColor(Color.LTGRAY)
-            binding.btnTuesday.setBackgroundColor(Color.LTGRAY)
-            binding.btnWednesday.setBackgroundColor(Color.LTGRAY)
-            binding.btnThursday.setBackgroundColor(Color.LTGRAY)
-            binding.btnFriday.setBackgroundColor(Color.LTGRAY)
-            binding.btnSaturday.setBackgroundColor(Color.LTGRAY)
-            binding.btnSunday.setBackgroundColor(Color.LTGRAY)
-        }
-        binding.btnNextWeek.setOnClickListener {
-            setDefaultButtonColor()
-            weekViewModel.nextWeek()
-        }
-        binding.btnPrevWeek.setOnClickListener {
-            setDefaultButtonColor()
-            weekViewModel.prevWeek()
-        }
+        setOnClickListeners()
 
+        return binding.root
+    }
+
+    /**
+     * Get selected date as String and pass that as an argument when navigating to DateFragment
+     * requires safeargs enabled in build.gradle
+     */
+    private fun goToDate(view : View) {
+        lateinit var selectedDate : String
+        when (view) {
+            binding.btnMonday -> selectedDate = weekViewModel.getDate(1)
+            binding.btnTuesday -> selectedDate = weekViewModel.getDate(2)
+            binding.btnWednesday -> selectedDate = weekViewModel.getDate(3)
+            binding.btnThursday -> selectedDate = weekViewModel.getDate(4)
+            binding.btnFriday -> selectedDate = weekViewModel.getDate(5)
+            binding.btnSaturday-> selectedDate = weekViewModel.getDate(6)
+            binding.btnSunday -> selectedDate = weekViewModel.getDate(7)
+            else -> {
+                Log.i("selectedDate", "Failed to get selected date")
+            }
+        }
+        val action = WeekFragmentDirections.actionWeekFragmentToDateFragment(selectedDate)
+        this.findNavController().navigate(action)
+        Log.i("weekday", selectedDate.toString())
+    }
+
+    // TODO: use backgroundTint instead of color to not lose animations etc.
+    //  make some sort of theme/style? and update colors and whatnot based on that?
+    //
+    private fun setDefaultButtonColor() {
+        binding.btnMonday.setBackgroundColor(Color.LTGRAY)
+        binding.btnTuesday.setBackgroundColor(Color.LTGRAY)
+        binding.btnWednesday.setBackgroundColor(Color.LTGRAY)
+        binding.btnThursday.setBackgroundColor(Color.LTGRAY)
+        binding.btnFriday.setBackgroundColor(Color.LTGRAY)
+        binding.btnSaturday.setBackgroundColor(Color.LTGRAY)
+        binding.btnSunday.setBackgroundColor(Color.LTGRAY)
+    }
+
+    /**
+     * Set button colors to indicate that we have entries
+     *
+     * TODO: Could we return something else, that we do not have to loop for every entry?
+     */
+    private fun setButtonColors(entries: List<WorktimeEntry>) {
+        for (i in 1..7) {
+            val weekDay : String = weekViewModel.getDate(i)
+            entries.forEach { entry ->
+                val entryDate : String = entry.startedAt.format(weekViewModel.dateTimeFormat2)
+                if (weekDay.equals(entryDate)) {
+                    if (i == 1) binding.btnMonday.setBackgroundColor(Color.parseColor(color))
+                    if (i == 2) binding.btnTuesday.setBackgroundColor(Color.parseColor(color))
+                    if (i == 3) binding.btnWednesday.setBackgroundColor(Color.parseColor(color))
+                    if (i == 4) binding.btnThursday.setBackgroundColor(Color.parseColor(color))
+                    if (i == 5) binding.btnFriday.setBackgroundColor(Color.parseColor(color))
+                    if (i == 6) binding.btnSaturday.setBackgroundColor(Color.parseColor(color))
+                    if (i == 7) binding.btnSunday.setBackgroundColor(Color.parseColor(color))
+                }
+                Log.i("entryDate", entryDate)
+            }
+        }
+    }
+
+    /**
+     * Set on click listeners for view buttons
+     */
+    private fun setOnClickListeners() {
         binding.btnMonday.setOnClickListener{ goToDate(it) }
         binding.btnTuesday.setOnClickListener{ goToDate(it) }
         binding.btnWednesday.setOnClickListener{ goToDate(it) }
@@ -152,7 +159,15 @@ class WeekFragment : Fragment() {
         binding.btnSaturday.setOnClickListener{ goToDate(it) }
         binding.btnSunday.setOnClickListener{ goToDate(it) }
 
-        return binding.root
-    }
+        binding.btnNextWeek.setOnClickListener {
+            setDefaultButtonColor()
+            weekViewModel.nextWeek()
+        }
 
+        binding.btnPrevWeek.setOnClickListener {
+            setDefaultButtonColor()
+            weekViewModel.prevWeek()
+        }
+
+    }
 }
