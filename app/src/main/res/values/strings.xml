@@ -6,12 +6,15 @@
     <string name="button_login_label">Kirjaudu</string>
     <string name="toast_login_invalid_credentials">Sähköpostiosoite ja/tai salasana eivät täsmää. Tarkista syöttämäsi tiedot.</string>
     <string name="toast_login_something_went_wrong">Hups, jotain meni nyt pieleen. Ole hyvä, tarkista laitteen internetyhteys ja yritä uudestaan.</string>
-    <string name="monday">Monday</string>
-    <string name="tuesday">Tuesday</string>
-    <string name="wednesday">Wednesday</string>
-    <string name="thursday">Thursday</string>
-    <string name="friday">Friday</string>
-    <string name="saturday">Saturday</string>
-    <string name="sunday">Sunday</string>
+    <string name="monday">Maanantai</string>
+    <string name="tuesday">Tiistai</string>
+    <string name="wednesday">Keskiviikko</string>
+    <string name="thursday">Torstai</string>
+    <string name="friday">Perjantai</string>
+    <string name="saturday">Lauantai</string>
+    <string name="sunday">Sunnuntai</string>
+    <string name="week">Viikko %1$s</string>
+    <string name="dates_between">Päivämäärä</string>
+    <string name="date">Päivämäärä</string>
 
 </resources>
