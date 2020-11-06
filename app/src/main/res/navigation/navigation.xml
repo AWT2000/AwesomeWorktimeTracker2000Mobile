@@ -17,9 +17,9 @@
             app:popUpToInclusive="true"/>
         <action
             android:id="@+id/action_startupFragment_to_mainFragment"
-            app:destination="@id/mainFragment"
+            app:destination="@id/weekFragment"
             app:popUpTo="@id/startupFragment"
-            app:popUpToInclusive="true"/>
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
@@ -28,7 +28,7 @@
         tools:layout="@layout/login_fragment" >
         <action
             android:id="@+id/action_loginFragment_to_mainFragment"
-            app:destination="@id/mainFragment" />
+            app:destination="@id/weekFragment" />
     </fragment>
     <fragment
         android:id="@+id/mainFragment"
@@ -52,5 +52,9 @@
         android:id="@+id/dateFragment"
         android:name="com.awesomeworktimetracker2000.awesomeworktimetrackermobile.ui.date.DateFragment"
         android:label="date_Fragment"
-        tools:layout="@layout/date_fragment"/>
+        tools:layout="@layout/date_fragment">
+        <argument
+            android:name="selectedDate"
+            app:argType="string" />
+    </fragment>
 </navigation>
