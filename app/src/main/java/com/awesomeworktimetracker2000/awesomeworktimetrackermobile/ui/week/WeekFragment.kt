@@ -85,6 +85,9 @@ class WeekFragment : Fragment() {
 
         weekViewModel = ViewModelProvider(this, weekViewModelFactory).get(WeekViewModel::class.java)
 
+
+        weekViewModel.getCachedWorkTimeEntries(weekViewModel.firstDayOfCurrentWeek, weekViewModel.lastDayOfCurrentWeek)
+
         // observe currentWeekNumber int in WeekViewModel and update tvWeekNumber.text accordingly
         weekViewModel.currentWeekNumber.observe(viewLifecycleOwner, Observer {
             this.tvWeekNumber.text = resources.getString(R.string.week, weekViewModel.currentWeekNumber.value.toString())
