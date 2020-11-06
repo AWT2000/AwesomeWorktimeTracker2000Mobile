@@ -1,6 +1,7 @@
 package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.date
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,20 +18,24 @@ import java.util.*
 
 class DateViewModel(private val worktimeEntryRepository: WorktimeEntryRepository) : ViewModel() {
 
-    // Placeholder until date gets passed from week vm
-    private var inputDate: LocalDate = LocalDate.of(2020, 4, 15)
+    // initialize inputDate and date variables
+    private var inputDate: LocalDate = LocalDate.now()
     private var date: Date = Date.from(inputDate.atStartOfDay(DateUtils.ZoneId).toInstant())
-    //private val date = MutableLiveData<Date>()
 
     // For updating DateFragment text view to current date
-    var currentDateString = MutableLiveData<String>()
+    private var _currentDateString = MutableLiveData<String>()
+    val currentDateString: LiveData<String>
+        get() = _currentDateString
+
     private var finnish: Locale? = Locale("fi", "FI")
     private val simpleDateFormat = SimpleDateFormat("EE dd.MM.yyyy", finnish)
 
     /**
      * Observable list of work time entries
      */
-    var worktimeEntries = MutableLiveData<List<WorktimeEntry>>()
+    private var _worktimeEntries = MutableLiveData<List<WorktimeEntry>>()
+    val worktimeEntries: LiveData<List<WorktimeEntry>>
+        get() = _worktimeEntries
 
     init {
         Log.i("DateViewModel", "DateViewModel created")
@@ -59,11 +64,11 @@ class DateViewModel(private val worktimeEntryRepository: WorktimeEntryRepository
             //      - maybe transforming errors to live data and showing it to the user?
 
             if (entryListing.status == ResponseStatus.OK || entryListing.status == ResponseStatus.OFFLINE) {
-                currentDateString.postValue(simpleDateFormat.format(date))
+                _currentDateString.postValue(simpleDateFormat.format(date))
             }
 
             if (entryListing.worktimeEntries != null) {
-                worktimeEntries.postValue(entryListing.worktimeEntries)
+                _worktimeEntries.postValue(entryListing.worktimeEntries)
             }
         }
     }
