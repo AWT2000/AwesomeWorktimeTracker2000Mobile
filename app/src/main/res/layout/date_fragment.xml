@@ -16,7 +16,7 @@
             android:id="@+id/tvDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Selected date"
+            android:text="@string/date"
             app:layout_constraintBottom_toBottomOf="@+id/btnPrevDate"
             app:layout_constraintEnd_toStartOf="@+id/btnNextDate"
             app:layout_constraintStart_toEndOf="@+id/btnPrevDate"
