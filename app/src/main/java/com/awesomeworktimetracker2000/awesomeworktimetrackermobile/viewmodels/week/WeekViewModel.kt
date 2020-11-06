@@ -28,8 +28,8 @@ class WeekViewModel(private val worktimeEntryRepository: WorktimeEntryRepository
 
     // initialize current date, and then initialize first and last day of the current week based on it
     private var currentDate : LocalDate = LocalDate.now()
-    private var firstDayOfCurrentWeek : LocalDate  = currentDate.with(previousOrSame(DayOfWeek.MONDAY))
-    private var lastDayOfCurrentWeek : LocalDate = currentDate.with(nextOrSame(DayOfWeek.SUNDAY))
+    var firstDayOfCurrentWeek : LocalDate  = currentDate.with(previousOrSame(DayOfWeek.MONDAY))
+    var lastDayOfCurrentWeek : LocalDate = currentDate.with(nextOrSame(DayOfWeek.SUNDAY))
 
     // The ISO-8601 definition, where a week starts on Monday and the first week has a minimum of 4 days.
     private var weekFields: WeekFields = WeekFields.ISO
