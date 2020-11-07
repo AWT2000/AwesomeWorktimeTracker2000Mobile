@@ -28,17 +28,19 @@ class EditFragment : Fragment(), DatePickerDialog.OnDateSetListener, TimePickerD
     private lateinit var binding: EditFragmentBinding
     private lateinit var application: Application
 
-    var day = 0;
-    var month = 0;
-    var year = 0;
-    var hour = 0;
-    var minute = 0;
+    private var day = 0;
+    private var month = 0;
+    private var year = 0;
+    private var hour = 0;
+    private var minute = 0;
+    private var savedDay = 0;
+    private var savedMonth = 0;
+    private var savedYear = 0;
+    private var savedHour = 0;
+    private var savedMinute = 0;
 
-    var savedDay = 0;
-    var savedMonth = 0;
-    var savedYear = 0;
-    var savedHour = 0;
-    var savedMinute = 0;
+    private var start = false
+    private var end = false
 
 
 
@@ -83,13 +85,13 @@ class EditFragment : Fragment(), DatePickerDialog.OnDateSetListener, TimePickerD
     private fun pickDateTime() {
         binding.editStartDatetime.setOnClickListener {
             getDateTimeCalendar()
-
+            start = true
             DatePickerDialog(requireNotNull(this.context), this, year, month, day).show()
         }
 
         binding.editEndDatetime.setOnClickListener {
             getDateTimeCalendar()
-
+            end = true
             DatePickerDialog(requireNotNull(this.context), this, year, month, day).show()
         }
     }
@@ -108,7 +110,18 @@ class EditFragment : Fragment(), DatePickerDialog.OnDateSetListener, TimePickerD
     override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
         savedHour = hourOfDay
         savedMinute = minute
-        edit_start_datetime.text = "$savedDay-$savedMonth-$savedYear $savedHour:$savedMinute" // TODO: This updates only the value of the start time atm. Need to fix.
+        if (start) {
+            edit_start_datetime.text =
+                "$savedDay-$savedMonth-$savedYear $savedHour:$savedMinute"
+        }
+
+        if (end) {
+            edit_end_datetime.text =
+                "$savedDay-$savedMonth-$savedYear $savedHour:$savedMinute"
+        }
+
+        start = false
+        end = false
     }
 
 
