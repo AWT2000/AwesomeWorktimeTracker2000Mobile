@@ -1,5 +1,6 @@
 package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.ui.week
 
+
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -8,6 +9,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -23,6 +26,7 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUti
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.week.WeekViewModel
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.week.WeekViewModelFactory
 import kotlinx.android.synthetic.main.week_fragment.*
+import kotlinx.coroutines.withTimeout
 import java.util.*
 
 
@@ -84,6 +88,8 @@ class WeekFragment : Fragment() {
 
         setOnClickListeners()
         setButtonTexts()
+
+
 
         return binding.root
     }
@@ -181,12 +187,17 @@ class WeekFragment : Fragment() {
             setDefaultButtonColor()
             weekViewModel.nextWeek()
             setButtonTexts()
+
+
+            view?.startAnimation(AnimationUtils.makeInAnimation(this.context, false))
         }
 
         binding.btnPrevWeek.setOnClickListener {
             setDefaultButtonColor()
             weekViewModel.prevWeek()
             setButtonTexts()
+
+            view?.startAnimation(AnimationUtils.makeInAnimation(this.context, true))
         }
 
     }

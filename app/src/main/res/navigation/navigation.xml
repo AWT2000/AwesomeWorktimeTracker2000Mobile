@@ -46,7 +46,9 @@
         tools:layout="@layout/week_fragment">
         <action
             android:id="@+id/action_weekFragment_to_dateFragment"
-            app:destination="@id/dateFragment" />
+            app:destination="@id/dateFragment"
+            app:enterAnim="@anim/fromright"
+            app:exitAnim="@anim/toleft" />
     </fragment>
     <fragment
         android:id="@+id/dateFragment"
