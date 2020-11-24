@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.OffsetDateTime
 
 @Entity(tableName = "projects")
 data class DatabaseProject(
@@ -14,5 +15,9 @@ data class DatabaseProject(
     @Embedded(prefix = "founder_")
     val founder: Contact?,
     @Embedded(prefix = "project_manager_")
-    val projectManager: Contact?
+    val projectManager: Contact?,
+    @ColumnInfo(name = "synced")
+    val synced: Boolean = false,
+    @ColumnInfo(name = "synced_at")
+    val syncedAt: OffsetDateTime? = null
 )
