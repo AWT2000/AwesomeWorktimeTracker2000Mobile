@@ -5,7 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.Project
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.WorktimeEntry
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.ProjectRepository
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.WorktimeEntryRepository
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.ResponseStatus
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils
@@ -16,7 +18,10 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
 
-class DateViewModel(private val worktimeEntryRepository: WorktimeEntryRepository) : ViewModel() {
+class DateViewModel(
+    private val worktimeEntryRepository: WorktimeEntryRepository,
+    private val projectRepository: ProjectRepository
+) : ViewModel() {
 
     // initialize inputDate and date variables
     private var inputDate: LocalDate = LocalDate.now()
@@ -68,6 +73,12 @@ class DateViewModel(private val worktimeEntryRepository: WorktimeEntryRepository
             }
 
             if (entryListing.worktimeEntries != null) {
+                val projects = this@DateViewModel.getProjects()
+
+                entryListing.worktimeEntries.forEach { entry ->
+                    entry.project = projects.firstOrNull { x -> x.id == entry.projectId }
+                }
+
                 _worktimeEntries.postValue(entryListing.worktimeEntries)
             }
         }
@@ -89,4 +100,19 @@ class DateViewModel(private val worktimeEntryRepository: WorktimeEntryRepository
         getWorkTimeEntries(date)
     }
 
+    suspend fun getProjects(): List<Project> {
+        val projectsListing = this.projectRepository.getProjects()
+
+        if (projectsListing.status == ResponseStatus.OK || projectsListing.status == ResponseStatus.OFFLINE) {
+            return if (projectsListing.projects != null) {
+                projectsListing.projects!!
+            } else {
+                listOf()
+            }
+        }
+
+        // TODO: handling other statuses e.g. ResponseStatus.OFFLINE, ResponseStatus.UNAUTHORIZED, ResponseStatus.UNDEFINEDERRO
+
+        return listOf()
+    }
 }

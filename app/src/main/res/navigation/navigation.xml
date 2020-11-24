@@ -70,5 +70,10 @@
         android:id="@+id/editFragment"
         android:name="com.awesomeworktimetracker2000.awesomeworktimetrackermobile.ui.edit.EditFragment"
         android:label="EditFragment"
-        tools:layout="@layout/edit_fragment"/>
+        tools:layout="@layout/edit_fragment">
+        <argument
+            android:name="worktimeEntryId"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
 </navigation>

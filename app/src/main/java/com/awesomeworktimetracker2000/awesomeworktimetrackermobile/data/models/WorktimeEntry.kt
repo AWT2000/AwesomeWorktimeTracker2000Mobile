@@ -8,6 +8,8 @@ data class WorktimeEntry(
     val endedAt: OffsetDateTime,
     val projectId: Int?,
     val externalId: Int?,
-    val synced: Boolean = false
+    val synced: Boolean = false,
+    var project: Project? = null
 ) {
+
 }

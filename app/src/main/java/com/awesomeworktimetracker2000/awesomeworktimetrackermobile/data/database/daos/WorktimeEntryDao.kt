@@ -17,6 +17,9 @@ interface WorktimeEntryDao {
     @Query("SELECT * FROM worktime_entries WHERE user_id = :userId AND external_id = :externalId")
     suspend fun getWorktimeEntryByExternalId(userId: Int, externalId: Int): DatabaseWorktimeEntry?
 
+    @Query("SELECT * FROM worktime_entries WHERE user_id = :userId AND id = :id")
+    suspend fun getWorktimeEntryById(userId: Int, id: Int): DatabaseWorktimeEntry?
+
     @Query("SELECT * FROM worktime_entries WHERE user_id = :userId AND synced = 0")
     suspend fun getUnsyncedWorktimeEntries(userId: Int): List<DatabaseWorktimeEntry>
 
