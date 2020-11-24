@@ -13,8 +13,10 @@
         <action
             android:id="@+id/action_startupFragment_to_loginFragment"
             app:destination="@id/loginFragment"
+            app:enterAnim="@anim/fromright"
+            app:exitAnim="@anim/toleft"
             app:popUpTo="@id/startupFragment"
-            app:popUpToInclusive="true"/>
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_startupFragment_to_mainFragment"
             app:destination="@id/weekFragment"
@@ -28,7 +30,7 @@
         tools:layout="@layout/login_fragment" >
         <action
             android:id="@+id/action_loginFragment_to_mainFragment"
-            app:destination="@id/weekFragment" />
+            app:destination="@id/mainFragment" />
     </fragment>
     <fragment
         android:id="@+id/mainFragment"
@@ -46,7 +48,9 @@
         tools:layout="@layout/week_fragment">
         <action
             android:id="@+id/action_weekFragment_to_dateFragment"
-            app:destination="@id/dateFragment" />
+            app:destination="@id/dateFragment"
+            app:enterAnim="@anim/fromright"
+            app:exitAnim="@anim/toleft" />
     </fragment>
     <fragment
         android:id="@+id/dateFragment"

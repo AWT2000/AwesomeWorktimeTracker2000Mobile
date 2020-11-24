@@ -13,7 +13,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.login.LoginFragment">
+        tools:context=".ui.login.LoginFragment"
+        android:background="@drawable/login_background">
 
 
         <LinearLayout
@@ -32,6 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/margin_medium"
                 android:gravity="center_horizontal"
+                android:textColor="@color/WhiteText"
                 android:text="@string/login_label"
                 android:textSize="24sp" />
 
@@ -41,6 +43,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/margin_medium"
                 android:ems="10"
+                android:textColorHint="@color/transparentLightGray"
+                android:textColor="@color/WhiteText"
                 android:inputType="textPersonName"
                 android:hint="@string/user_name" />
 
@@ -50,6 +54,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/margin_medium"
                 android:ems="10"
+                android:textColorHint="@color/transparentLightGray"
+                android:textColor="@color/WhiteText"
                 android:inputType="textPassword"
                 android:hint="@string/password"/>
 
@@ -58,6 +64,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/button_login_label"
+                android:background="@drawable/login_button"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:enabled="@{loginViewModel.loginButtonEnabled}"/>
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

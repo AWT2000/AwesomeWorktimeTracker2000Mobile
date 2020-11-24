@@ -86,7 +86,18 @@ class DateFragment : Fragment() {
             dateViewModel.prevDate()
         }
 
-        //dateViewModel.getWorkTimeEntries(SimpleDateFormat("yyyy-MM-dd").parse("2020-10-05"))
+        dateViewModel.getWorkTimeEntries(SimpleDateFormat("yyyy-MM-dd").parse("2020-10-05"))
+
+        // create an adapter and associate the adapter with recyclerview
+        val adapter = WorktimeEntryAdapter()
+        binding.rvDay.adapter = adapter
+
+        dateViewModel.worktimeEntries.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                adapter.data = it
+            }
+        })
+
         return binding.root
     }
 

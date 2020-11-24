@@ -2,7 +2,8 @@
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/gradient_background">
 <data>
     <variable
         name="DateViewModel"
@@ -20,7 +21,8 @@
             app:layout_constraintBottom_toBottomOf="@+id/btnPrevDate"
             app:layout_constraintEnd_toStartOf="@+id/btnNextDate"
             app:layout_constraintStart_toEndOf="@+id/btnPrevDate"
-            app:layout_constraintTop_toTopOf="@+id/btnPrevDate" />
+            app:layout_constraintTop_toTopOf="@+id/btnPrevDate"
+            android:textColor="@color/WhiteText"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvDay"
@@ -32,27 +34,31 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnNextDate" />
+            app:layout_constraintTop_toBottomOf="@+id/btnNextDate"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
         <Button
             android:id="@+id/btnPrevDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_marginStart="@dimen/default_margin"
             android:layout_marginTop="@dimen/default_margin"
-            android:text="prev"
+            android:drawableStart="@drawable/ic_baseline_arrow_left_24"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@drawable/week_button"/>
 
         <Button
             android:id="@+id/btnNextDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/default_margin"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_marginEnd="@dimen/default_margin"
-            android:text="Next"
+            android:layout_marginStart="@dimen/default_margin"
+            android:layout_marginTop="@dimen/default_margin"
+            android:drawableEnd="@drawable/ic_baseline_arrow_right_24"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@drawable/week_button"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabAdd"

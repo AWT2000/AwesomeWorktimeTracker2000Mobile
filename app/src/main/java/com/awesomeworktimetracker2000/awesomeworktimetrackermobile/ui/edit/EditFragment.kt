@@ -1,5 +1,6 @@
 package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.ui.edit
 
+import android.app.AlertDialog
 import android.app.Application
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -80,19 +81,22 @@ class EditFragment : Fragment(), DatePickerDialog.OnDateSetListener, TimePickerD
         hour = cal.get(Calendar.HOUR)
         minute = cal.get(Calendar.MINUTE)
 
+        DatePickerDialog(requireNotNull(this.context), AlertDialog.THEME_HOLO_DARK, this, year, month, day)
+
+
     }
 
     private fun pickDateTime() {
         binding.editStartDatetime.setOnClickListener {
             getDateTimeCalendar()
             start = true
-            DatePickerDialog(requireNotNull(this.context), this, year, month, day).show()
+            DatePickerDialog(requireNotNull(this.context), AlertDialog.THEME_HOLO_DARK, this, year, month, day).show()
         }
 
         binding.editEndDatetime.setOnClickListener {
             getDateTimeCalendar()
             end = true
-            DatePickerDialog(requireNotNull(this.context), this, year, month, day).show()
+            DatePickerDialog(requireNotNull(this.context), AlertDialog.THEME_HOLO_DARK, this, year, month, day).show()
         }
     }
 
@@ -104,7 +108,7 @@ class EditFragment : Fragment(), DatePickerDialog.OnDateSetListener, TimePickerD
         savedYear = year
 
         getDateTimeCalendar()
-        TimePickerDialog(requireNotNull(this.context), this, hour, minute, true).show()
+        TimePickerDialog(requireNotNull(this.context), AlertDialog.THEME_HOLO_DARK, this, hour, minute, true).show()
     }
 
     override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
