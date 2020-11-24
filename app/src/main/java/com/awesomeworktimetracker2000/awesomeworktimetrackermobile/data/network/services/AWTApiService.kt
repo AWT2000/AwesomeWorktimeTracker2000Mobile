@@ -4,6 +4,7 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.worktimeEntries.SaveWorktimeEntryRequest
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.auth.LoginResponseDto
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.auth.UserDto
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.projects.listing.ProjectDto
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.worktimeEntries.listing.worktimeEntryListingResponseDto
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.worktimeEntries.save.SaveWorktimeEntryResponseDto
 import retrofit2.Response
@@ -125,6 +126,22 @@ interface AWTApiService {
         @Header("Authorization") token: String,
         @Path("id") id: Int
     ): Response<Unit>
+
+    @Headers("Accepts: Application/json")
+    @GET("projects")
+    /**
+     * Makes a HTTP GET request to web api for all projects
+     *
+     * For example:
+     * ```
+     * val response = apiService.getProjects(
+     *      token = "Bearer token.from.api"
+     * )
+     * ```
+     */
+    suspend fun getProjects(
+        @Header("Authorization") token: String
+    ): Response<List<ProjectDto>>
 }
 
 object AWTApi {
