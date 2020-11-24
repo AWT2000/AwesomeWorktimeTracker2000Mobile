@@ -83,6 +83,7 @@ class WeekFragment : Fragment() {
         })
 
         setOnClickListeners()
+        setButtonTexts()
 
         return binding.root
     }
@@ -114,13 +115,14 @@ class WeekFragment : Fragment() {
     //  make some sort of theme/style? and update colors and whatnot based on that?
     //
     private fun setDefaultButtonColor() {
-        binding.btnMonday.setBackgroundColor(Color.LTGRAY)
-        binding.btnTuesday.setBackgroundColor(Color.LTGRAY)
-        binding.btnWednesday.setBackgroundColor(Color.LTGRAY)
-        binding.btnThursday.setBackgroundColor(Color.LTGRAY)
-        binding.btnFriday.setBackgroundColor(Color.LTGRAY)
-        binding.btnSaturday.setBackgroundColor(Color.LTGRAY)
-        binding.btnSunday.setBackgroundColor(Color.LTGRAY)
+        binding.btnMonday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_button))
+        binding.btnTuesday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_button))
+        binding.btnWednesday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_button))
+        binding.btnThursday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_button))
+        binding.btnFriday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_button))
+        binding.btnSaturday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_button))
+        binding.btnSunday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_button))
+
     }
 
     /**
@@ -134,16 +136,32 @@ class WeekFragment : Fragment() {
             entries.forEach { entry ->
                 val entryDate : String = entry.startedAt.format(weekViewModel.dateTimeFormat2)
                 if (weekDay.equals(entryDate)) {
-                    if (i == 1) binding.btnMonday.setBackgroundColor(Color.parseColor(color))
-                    if (i == 2) binding.btnTuesday.setBackgroundColor(Color.parseColor(color))
-                    if (i == 3) binding.btnWednesday.setBackgroundColor(Color.parseColor(color))
-                    if (i == 4) binding.btnThursday.setBackgroundColor(Color.parseColor(color))
-                    if (i == 5) binding.btnFriday.setBackgroundColor(Color.parseColor(color))
-                    if (i == 6) binding.btnSaturday.setBackgroundColor(Color.parseColor(color))
-                    if (i == 7) binding.btnSunday.setBackgroundColor(Color.parseColor(color))
+                    if (i == 1) binding.btnMonday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_contains_data_button))
+                    if (i == 2) binding.btnTuesday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_contains_data_button))
+                    if (i == 3) binding.btnWednesday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_contains_data_button))
+                    if (i == 4) binding.btnThursday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_contains_data_button))
+                    if (i == 5) binding.btnFriday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_contains_data_button))
+                    if (i == 6) binding.btnSaturday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_contains_data_button))
+                    if (i == 7) binding.btnSunday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_contains_data_button))
+
                 }
                 Log.i("entryDate", entryDate)
             }
+        }
+    }
+    /*
+     * Set dates and weekdays to buttons
+     */
+    private fun setButtonTexts() {
+        for (i in 1..7) {
+            val weekDay: String = weekViewModel.getDate(i)
+            binding.btnMonday.setText(weekViewModel.getDate(1) + " " + resources.getString(R.string.monday))
+            binding.btnTuesday.setText(weekViewModel.getDate(2) + " " + resources.getString(R.string.tuesday))
+            binding.btnWednesday.setText(weekViewModel.getDate(3) + " " + resources.getString(R.string.wednesday))
+            binding.btnThursday.setText(weekViewModel.getDate(4) + " " + resources.getString(R.string.thursday))
+            binding.btnFriday.setText(weekViewModel.getDate(5) + " " + resources.getString(R.string.friday))
+            binding.btnSaturday.setText(weekViewModel.getDate(6) + " " + resources.getString(R.string.saturday))
+            binding.btnSunday.setText(weekViewModel.getDate(7) + " " + resources.getString(R.string.sunday))
         }
     }
 
@@ -162,11 +180,13 @@ class WeekFragment : Fragment() {
         binding.btnNextWeek.setOnClickListener {
             setDefaultButtonColor()
             weekViewModel.nextWeek()
+            setButtonTexts()
         }
 
         binding.btnPrevWeek.setOnClickListener {
             setDefaultButtonColor()
             weekViewModel.prevWeek()
+            setButtonTexts()
         }
 
     }
