@@ -6,9 +6,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.R
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.AWTDatabase
@@ -81,9 +83,11 @@ class DateFragment : Fragment() {
 
         binding.btnNextDate.setOnClickListener {
             dateViewModel.nextDate()
+            view?.startAnimation(AnimationUtils.makeInAnimation(this.context, false))
         }
         binding.btnPrevDate.setOnClickListener {
             dateViewModel.prevDate()
+            view?.startAnimation(AnimationUtils.makeInAnimation(this.context, true))
         }
 
         dateViewModel.getWorkTimeEntries(SimpleDateFormat("yyyy-MM-dd").parse("2020-10-05"))
@@ -98,8 +102,20 @@ class DateFragment : Fragment() {
             }
         })
 
+        // bind floating action button to navigate to editfragment
+        binding.fabAdd.setOnClickListener{goToEditFragment()}
+
         return binding.root
     }
+
+    // navigate to editfragment
+    // TODO: pass current date to editfragment
+    private fun goToEditFragment() {
+        val action = DateFragmentDirections.actionDateFragmentToEditFragment()
+        this.findNavController().navigate(action);
+    }
+
+
 
 
 }
