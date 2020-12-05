@@ -57,6 +57,7 @@ class DateFragment : Fragment() {
         // initialize view model
         val dateViewModelFactory = DateViewModelFactory(
             AWTDatabase.getInstance(application).worktimeEntryDao,
+            AWTDatabase.getInstance(application).projectDao,
             AWTDatabase.getInstance(application).userDao,
             AWTApi.service,
             ConnectionUtils.getInstance(application)
@@ -64,17 +65,7 @@ class DateFragment : Fragment() {
 
         dateViewModel = ViewModelProvider(this, dateViewModelFactory).get(DateViewModel::class.java)
 
-
         Log.i("selectedDate", args.selectedDate.toString())
-        dateViewModel.getWorkTimeEntries(SimpleDateFormat("yyyy-MM-dd").parse(args.selectedDate.toString()))
-
-        dateViewModel.worktimeEntries.observe(viewLifecycleOwner, Observer {
-            it.forEach { entry ->
-                Log.i("worktimeEntries", "external id: ${entry.externalId}, started_at: "
-                        + "${entry.startedAt.format(DateUtils.isoDateFormatter)}, "
-                        + "ended_at: ${entry.endedAt.format(DateUtils.isoDateFormatter)}" )
-            }
-        })
 
         // Observe currentDate in DateViewModel and update tvDate.text accordingly
         dateViewModel.currentDateString.observe(viewLifecycleOwner, Observer {
@@ -90,32 +81,45 @@ class DateFragment : Fragment() {
             view?.startAnimation(AnimationUtils.makeInAnimation(this.context, true))
         }
 
-        dateViewModel.getWorkTimeEntries(SimpleDateFormat("yyyy-MM-dd").parse("2020-10-05"))
-
         // create an adapter and associate the adapter with recyclerview
-        val adapter = WorktimeEntryAdapter()
-        binding.rvDay.adapter = adapter
-
-        dateViewModel.worktimeEntries.observe(viewLifecycleOwner, Observer {
-            it?.let {
-                adapter.data = it
-            }
-        })
+        val workTimeEntryAdapter = WorktimeEntryAdapter {
+            this.goToEditFragment(it)
+        }
 
         // bind floating action button to navigate to editfragment
         binding.fabAdd.setOnClickListener{goToEditFragment()}
+        binding.rvDay.apply {
+            adapter = workTimeEntryAdapter
+        }
+
+        dateViewModel.worktimeEntries.observe(viewLifecycleOwner, Observer {
+            it?.let { list ->
+                workTimeEntryAdapter.data = list
+            }
+
+            it.forEach { entry ->
+                Log.i("worktimeEntries", "external id: ${entry.externalId}, started_at: "
+                        + "${entry.startedAt.format(DateUtils.isoDateFormatter)}, "
+                        + "ended_at: ${entry.endedAt.format(DateUtils.isoDateFormatter)}" )
+            }
+        })
+
+        dateViewModel.getWorkTimeEntries(SimpleDateFormat("yyyy-MM-dd").parse(args.selectedDate.toString()))
 
         return binding.root
     }
 
     // navigate to editfragment
     // TODO: pass current date to editfragment
-    private fun goToEditFragment() {
-        val action = DateFragmentDirections.actionDateFragmentToEditFragment()
+    private fun goToEditFragment(entryId: Int? = null) {
+
+        val passableWorktimeEntryId = entryId ?: 0
+
+        val action = DateFragmentDirections
+            .actionDateFragmentToEditFragment()
+            .setWorktimeEntryId(passableWorktimeEntryId)
+
         this.findNavController().navigate(action);
     }
-
-
-
 
 }

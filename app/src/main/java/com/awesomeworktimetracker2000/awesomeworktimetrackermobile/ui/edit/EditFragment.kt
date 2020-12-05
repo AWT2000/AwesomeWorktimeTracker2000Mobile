@@ -18,8 +18,15 @@ import android.widget.TimePicker
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBinderMapperImpl
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.navArgs
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.R
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.AWTDatabase
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApi
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.databinding.EditFragmentBinding
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.ConnectionUtils
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.edit.EditViewModel
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.edit.EditViewModelFactory
 import kotlinx.android.synthetic.main.edit_fragment.*
 import java.time.Month
 
@@ -43,12 +50,13 @@ class EditFragment : Fragment(), DatePickerDialog.OnDateSetListener, TimePickerD
     private var start = false
     private var end = false
 
-
+    private val args: EditFragmentArgs by navArgs()
 
     companion object {
         fun newInstance() = EditFragment()
     }
 
+    private lateinit var editViewModel: EditViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,8 +75,20 @@ class EditFragment : Fragment(), DatePickerDialog.OnDateSetListener, TimePickerD
 
         application = requireNotNull(this.activity).application
 
-        pickDateTime()
+        val worktimeEntryId = args.worktimeEntryId
 
+        val editViewMOdelFactory = EditViewModelFactory(
+            AWTDatabase.getInstance(application).worktimeEntryDao,
+            AWTDatabase.getInstance(application).projectDao,
+            AWTDatabase.getInstance(application).userDao,
+            AWTApi.service,
+            ConnectionUtils.getInstance(application),
+            worktimeEntryId
+        )
+
+        editViewModel = ViewModelProvider(this, editViewMOdelFactory).get(EditViewModel::class.java)
+
+        pickDateTime()
 
         return binding.root
     }

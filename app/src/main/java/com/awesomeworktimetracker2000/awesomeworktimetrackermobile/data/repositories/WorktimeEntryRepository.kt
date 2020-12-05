@@ -8,6 +8,7 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.W
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApiService
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.ResponseStatus
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.WorktimeEntryListing
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.WorktimeEntryResponse
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.ConnectionUtils
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.localOffset
@@ -171,6 +172,54 @@ class WorktimeEntryRepository private constructor (
             }
         }
         return WorktimeEntryListing(ResponseStatus.UNDEFINEDERROR)
+    }
+
+    suspend fun getWorktimeEntryById(id: Int): WorktimeEntryResponse {
+        val databaseWorktimeEntry = worktimeEntryDao.getWorktimeEntryById(userId, id)
+            ?: return WorktimeEntryResponse(ResponseStatus.NOTFOUND)
+
+        val worktimeEntry = WorktimeEntry(
+            id = databaseWorktimeEntry!!.id,
+            externalId = databaseWorktimeEntry.externalId,
+            startedAt = databaseWorktimeEntry.startedAt,
+            endedAt = databaseWorktimeEntry.endedAt,
+            synced = databaseWorktimeEntry.synced,
+            projectId = databaseWorktimeEntry.projectId
+        )
+
+        return if (connectionUtils.hasInternetConnection() && worktimeEntry.externalId != null) {
+            getSyncedWorktimeEntry(worktimeEntry)
+        } else {
+            WorktimeEntryResponse(ResponseStatus.OFFLINE, worktimeEntry)
+        }
+    }
+
+    private suspend fun getSyncedWorktimeEntry(worktimeEntry: WorktimeEntry): WorktimeEntryResponse {
+        val responseFromApi = apiService.getWorktimeEntryById(
+            token = "Bearer $token",
+            id = worktimeEntry.externalId!!)
+
+        if (responseFromApi.isSuccessful) {
+            val entryFromApi = responseFromApi.body()!!
+
+            return WorktimeEntryResponse(
+                status = ResponseStatus.OK,
+                entry = updateEntryToDb(
+                    DatabaseWorktimeEntry(
+                        id = worktimeEntry.id,
+                        externalId = worktimeEntry.externalId,
+                        startedAt = formatter.parse(entryFromApi.started_at, OffsetDateTime::from),
+                        endedAt = formatter.parse(entryFromApi.ended_at, OffsetDateTime::from),
+                        projectId = entryFromApi.project_id,
+                        synced = true,
+                        userId = userId,
+                        syncedAt = OffsetDateTime.now()
+                    )
+                )
+            )
+        } else {
+            return WorktimeEntryResponse(ResponseStatus.NOTFOUND)
+        }
     }
 
 //    val tempEntry = MutableLiveData<WorktimeEntry>(null)

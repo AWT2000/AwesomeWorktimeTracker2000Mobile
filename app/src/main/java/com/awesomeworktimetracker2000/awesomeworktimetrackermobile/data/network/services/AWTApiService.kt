@@ -7,6 +7,7 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.projects.listing.ProjectDto
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.worktimeEntries.listing.worktimeEntryListingResponseDto
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.worktimeEntries.save.SaveWorktimeEntryResponseDto
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.worktimeEntries.single.GetWorktimeEntryResponseDto
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -126,6 +127,13 @@ interface AWTApiService {
         @Header("Authorization") token: String,
         @Path("id") id: Int
     ): Response<Unit>
+
+    @Headers("Accepts: Application/json")
+    @GET("worktime-entries/{id}")
+    suspend fun getWorktimeEntryById(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
+    ): Response<GetWorktimeEntryResponseDto>
 
     @Headers("Accepts: Application/json")
     @GET("projects")

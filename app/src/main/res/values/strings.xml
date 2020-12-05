@@ -19,5 +19,8 @@
     <string name="project">Projekti</string>
     <string name="save">Tallenna</string>
     <string name="delete">Poista</string>
+    <string name="worktime_entry_list_item_project">%1$s</string>
+    <string name="worktime_entry_list_item_project_no_project">Muu työ</string>
+    <string name="worktime_entry_list_item_start_and_end_times">%1$s - %2$s</string>
 
 </resources>
