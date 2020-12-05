@@ -63,12 +63,12 @@ class ProjectRepository private constructor (
      * @return ProjectListing with list of projects and response status
      */
     suspend fun getProjects(): ProjectListing {
-
-        return if (connectionUtils.hasInternetConnection()) {
-            syncProjects()
-        } else {
-            getCachedProjects()
-        }
+        return getCachedProjects()
+//        return if (connectionUtils.hasInternetConnection()) {
+//            syncProjects()
+//        } else {
+//            getCachedProjects()
+//        }
     }
 
     /**
@@ -76,7 +76,7 @@ class ProjectRepository private constructor (
      *
      * @return ProjectListing with list of projects and response status
      */
-    suspend fun getCachedProjects(): ProjectListing {
+    private suspend fun getCachedProjects(): ProjectListing {
         return try {
             ProjectListing(
                 status = ResponseStatus.OFFLINE,
@@ -102,7 +102,7 @@ class ProjectRepository private constructor (
      *
      * @return ProjectListing with list of projects and response status
      */
-    private suspend fun syncProjects(): ProjectListing {
+    suspend fun syncProjects(): ProjectListing {
         Log.i("projects", "Bearer $token")
         val response = apiService
             .getProjects("Bearer $token")

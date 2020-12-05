@@ -4,6 +4,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 object DateUtils {
     val localOffset: ZoneOffset = OffsetDateTime.now().offset
@@ -17,5 +18,20 @@ object DateUtils {
         val localDateTime = dateTime.withOffsetSameInstant(localOffset)
 
         return DateTimeFormatter.ofPattern("HH:mm").format(localDateTime)
+    }
+
+    /**
+     * Get date object + or - days from today.
+     *
+     * e.g.
+     ```
+        val yesterday = todayAddDays(-1)
+     ```
+     */
+    fun todayAddDays(days: Int): Date {
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, days)
+
+        return calendar.time
     }
 }

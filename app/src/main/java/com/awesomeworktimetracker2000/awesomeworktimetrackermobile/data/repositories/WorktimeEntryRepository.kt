@@ -11,8 +11,6 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.reposito
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.WorktimeEntryResponse
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.ConnectionUtils
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils
-import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.localOffset
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.lang.Exception
@@ -85,7 +83,7 @@ class WorktimeEntryRepository private constructor (
         val end = localDate.plusDays(1).atTime(OffsetTime.MIN).toString()
 
         return if (connectionUtils.hasInternetConnection()) {
-            syncWorktimeEntriesBetweenDateTimes(date, start, end)
+            syncWorktimeEntriesBetweenDateTimes(date, date, start, end)
         } else {
             getCachedWorktimeEntriesBetweenDateTimes(start, end)
         }
@@ -123,26 +121,33 @@ class WorktimeEntryRepository private constructor (
     /**
      * Fetches work time entries from api between given date times.
      *
-     * @param start date time string in yyyy-MM-dd'T'HH:mm:ssxxx format
-     * @param end date time string in yyyy-MM-dd'T'HH:mm:ssxxx format
+     * @param startDate date object for start time
+     * @param endDate date object for end time
+     * @param startDateTimeString date time string in yyyy-MM-dd'T'HH:mm:ssxxx format
+     * @param endDateTimeString date time string in yyyy-MM-dd'T'HH:mm:ssxxx format
      *
      * @return WorktimeEntryListing with list of entries and response status
      */
-    private suspend fun syncWorktimeEntriesBetweenDateTimes(date: Date, start: String, end: String): WorktimeEntryListing {
+    suspend fun syncWorktimeEntriesBetweenDateTimes(
+        startDate: Date,
+        endDate: Date,
+        startDateTimeString: String,
+        endDateTimeString: String
+    ): WorktimeEntryListing {
         Log.i("worktimeEntries", "Bearer $token")
 
-        Log.i("worktimeEntries", "start: $start, end: $end")
+        Log.i("worktimeEntries", "start: $startDateTimeString, end: $endDateTimeString")
 
         val response = apiService
             .getWorktimeEntries("Bearer $token",
-                simpleDateFormatter.format(date),
-                simpleDateFormatter.format(date))
+                simpleDateFormatter.format(startDate),
+                simpleDateFormatter.format(endDate))
 
         if (response.isSuccessful) {
             response.body()?.let {
                 val entriesFromApi = it.data
 
-                worktimeEntryDao.clearWorktimeEntriesBetweenDates(userId, start, end);
+                worktimeEntryDao.clearWorktimeEntriesBetweenDates(userId, startDateTimeString, endDateTimeString);
 
                 try {
                     val syncedEntries = entriesFromApi.map { dto ->
@@ -219,6 +224,27 @@ class WorktimeEntryRepository private constructor (
             )
         } else {
             return WorktimeEntryResponse(ResponseStatus.NOTFOUND)
+        }
+    }
+
+    suspend fun getUnsyncedWorktimeEntries(): WorktimeEntryListing {
+        try {
+            val unsyncedEntries = worktimeEntryDao.getUnsyncedWorktimeEntries(userId)
+
+            return WorktimeEntryListing(
+                status = ResponseStatus.OK,
+                worktimeEntries = unsyncedEntries.map { entry ->
+                    WorktimeEntry(
+                        id = entry.id,
+                        externalId = entry.externalId,
+                        startedAt = entry.startedAt,
+                        endedAt = entry.endedAt,
+                        projectId = entry.projectId,
+                        synced = false
+                    )
+                })
+        } catch (e: Exception) {
+            return WorktimeEntryListing(ResponseStatus.DBERROR)
         }
     }
 
@@ -322,9 +348,12 @@ class WorktimeEntryRepository private constructor (
      * @param entry work time entry to add or update.
      */
     private suspend fun addEntryToDb(entry: WorktimeEntry): WorktimeEntry {
-        val existingEntry = worktimeEntryDao.getWorktimeEntryByExternalId(userId, entry.externalId!!)
-        if (existingEntry != null) {
-            return updateEntryToDb(DatabaseWorktimeEntry(
+
+        if (entry.externalId != null) {
+            val existingEntry = worktimeEntryDao.getWorktimeEntryByExternalId(userId, entry.externalId)
+
+            if (existingEntry != null) {
+                return updateEntryToDb(DatabaseWorktimeEntry(
                     id = existingEntry.id,
                     userId = userId,
                     startedAt = entry.startedAt,
@@ -334,6 +363,7 @@ class WorktimeEntryRepository private constructor (
                     synced = true,
                     syncedAt = OffsetDateTime.now()
                 ))
+            }
         }
 
         try {
