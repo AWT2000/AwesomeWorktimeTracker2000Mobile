@@ -19,7 +19,7 @@
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_startupFragment_to_mainFragment"
-            app:destination="@id/weekFragment"
+            app:destination="@id/mainFragment"
             app:popUpTo="@id/startupFragment"
             app:popUpToInclusive="true" />
     </fragment>
