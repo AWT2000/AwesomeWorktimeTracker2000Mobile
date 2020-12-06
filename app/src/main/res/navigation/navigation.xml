@@ -41,7 +41,9 @@
             android:id="@+id/action_mainFragment_to_weekFragment"
             app:destination="@id/weekFragment"
             app:enterAnim="@anim/fromright"
-            app:exitAnim="@anim/toleft" />
+            app:exitAnim="@anim/toleft"
+            app:popEnterAnim="@anim/fromleft"
+            app:popExitAnim="@anim/toright" />
     </fragment>
     <fragment
         android:id="@+id/weekFragment"
@@ -52,7 +54,9 @@
             android:id="@+id/action_weekFragment_to_dateFragment"
             app:destination="@id/dateFragment"
             app:enterAnim="@anim/fromright"
-            app:exitAnim="@anim/toleft" />
+            app:exitAnim="@anim/toleft"
+            app:popEnterAnim="@anim/fromleft"
+            app:popExitAnim="@anim/toright" />
     </fragment>
     <fragment
         android:id="@+id/dateFragment"
@@ -66,7 +70,9 @@
             android:id="@+id/action_dateFragment_to_editFragment"
             app:destination="@id/editFragment"
             app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit" />
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
     </fragment>
     <fragment
         android:id="@+id/editFragment"
