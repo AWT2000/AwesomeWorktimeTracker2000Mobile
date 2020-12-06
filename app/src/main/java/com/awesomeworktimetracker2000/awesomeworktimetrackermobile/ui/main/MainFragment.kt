@@ -9,6 +9,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.R
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.AWTDatabase
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApi
@@ -57,4 +58,13 @@ class MainFragment : Fragment() {
 
         return binding.root
     }
+
+    // navigate to weekFragment
+    private fun goToWeekFragment() {
+
+        val action = MainFragmentDirections.actionMainFragmentToWeekFragment()
+
+        this.findNavController().navigate(action);
+    }
+
 }
