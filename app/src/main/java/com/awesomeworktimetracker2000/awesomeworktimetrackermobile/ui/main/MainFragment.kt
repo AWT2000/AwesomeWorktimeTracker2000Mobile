@@ -40,6 +40,9 @@ class MainFragment : Fragment() {
         binding = DataBindingUtil.inflate(inflater, R.layout.main_fragment, container, false)
         binding.lifecycleOwner = this
 
+        // binding buttons to navigation paths
+        binding.btnWeekFragment.setOnClickListener{goToWeekFragment()}
+
         val application = requireNotNull(this.activity).application
 
         val awtDatabase = AWTDatabase.getInstance(application)
@@ -64,7 +67,7 @@ class MainFragment : Fragment() {
 
         val action = MainFragmentDirections.actionMainFragmentToWeekFragment()
 
-        this.findNavController().navigate(action);
+        this.findNavController().navigate(action)
     }
 
 }
