@@ -9,6 +9,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:gravity="center">
+
         <TextView
             android:id="@+id/edit_start_datetime"
             android:layout_width="match_parent"
@@ -16,10 +26,11 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginTop="@dimen/default_margin"
             android:layout_marginRight="@dimen/default_margin"
-            android:textColorHint="@color/WhiteText"
-            android:textColor="@color/WhiteText"
+            android:layout_marginBottom="@dimen/margin_medium"
             android:hint="Valitse alkamispäivämäärä ja -aika"
             android:inputType="none"
+            android:textColor="@color/WhiteText"
+            android:textColorHint="@color/WhiteText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/spnrProject" />
@@ -29,12 +40,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/default_margin"
-            android:layout_marginTop="@dimen/default_margin"
+            android:layout_marginTop="@dimen/margin_medium"
             android:layout_marginRight="@dimen/default_margin"
-            android:textColorHint="@color/WhiteText"
-            android:textColor="@color/WhiteText"
             android:hint="Valitse päättymispäivämäärä ja -aika"
             android:inputType="none"
+            android:textColor="@color/WhiteText"
+            android:textColorHint="@color/WhiteText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/edit_start_datetime" />
@@ -44,40 +55,40 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_margin"
-            android:layout_marginTop="@dimen/default_margin"
-            android:drawableLeft="@drawable/ic_baseline_save_alt_24"
-            android:gravity="center_horizontal"
+            android:layout_marginTop="@dimen/margin_medium"
             android:background="@drawable/save_button"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/edit_end_datetime"
+            android:drawableLeft="@drawable/ic_baseline_save_alt_24"
             android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center_horizontal"
             android:paddingLeft="40dp"
-            android:paddingRight="40dp"/>
+            android:paddingRight="40dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/edit_end_datetime" />
 
         <Button
             android:id="@+id/btnDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/default_margin"
+            android:layout_marginTop="@dimen/margin_medium"
             android:layout_marginEnd="@dimen/default_margin"
             android:background="@drawable/delete_button"
             android:drawableLeft="@drawable/ic_baseline_delete_outline_24"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/edit_end_datetime"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:paddingLeft="40dp"
-            android:paddingRight="40dp"/>/>
+            android:paddingRight="40dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/edit_end_datetime" />
 
         <Spinner
             android:id="@+id/spnrProject"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/WhiteText"
             android:layout_marginStart="@dimen/default_margin"
-            android:layout_marginTop="32dp"
             android:layout_marginEnd="@dimen/default_margin"
+            android:backgroundTint="@color/WhiteText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

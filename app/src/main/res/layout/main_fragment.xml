@@ -11,16 +11,103 @@
         android:layout_height="match_parent"
         android:background="@drawable/gradient_background">
 
-        <TextView
-            android:id="@+id/message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="MainFragment"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <Button
+        android:id="@+id/btnWeekFragment"
+        android:layout_width="158dp"
+        android:layout_height="125dp"
+        android:layout_marginStart="@dimen/margin_wide"
+        android:layout_marginBottom="@dimen/margin_wide"
+        android:background="@drawable/mainmenu_button"
+        android:drawableTop="@drawable/ic_baseline_calendar_today_60"
+        android:paddingTop="14dp"
+        android:text="@string/btnWeekView"
+        android:textColor="@color/WhiteText"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintBottom_toTopOf="@+id/btnContacts"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnMessages"
+        android:layout_width="158dp"
+        android:layout_height="125dp"
+        android:layout_marginEnd="@dimen/margin_wide"
+        android:layout_marginBottom="@dimen/margin_wide"
+        android:background="@drawable/mainmenu_button"
+        android:drawableTop="@drawable/ic_baseline_messages_60"
+        android:paddingTop="14dp"
+        android:text="@string/btnMessage"
+        android:textColor="@color/WhiteText"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintBottom_toTopOf="@+id/btnProjects"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/btnContacts"
+        android:layout_width="158dp"
+        android:layout_height="125dp"
+        android:layout_marginLeft="@dimen/margin_wide"
+        android:background="@drawable/mainmenu_button"
+        android:drawableTop="@drawable/ic_baseline_perm_contacts_calendar_60"
+        android:paddingTop="14dp"
+        android:text="@string/btnContacts"
+        android:textColor="@color/WhiteText"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnProjects"
+        android:layout_width="158dp"
+        android:layout_height="125dp"
+        android:layout_marginEnd="@dimen/margin_wide"
+        android:background="@drawable/mainmenu_button"
+        android:drawableTop="@drawable/ic_baseline_projects_60"
+        android:paddingTop="14dp"
+        android:text="@string/btnProjects"
+        android:textColor="@color/WhiteText"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnStatistics"
+        android:layout_width="158dp"
+        android:layout_height="125dp"
+        android:layout_marginStart="@dimen/margin_wide"
+        android:layout_marginTop="@dimen/margin_wide"
+        android:background="@drawable/mainmenu_button"
+        android:drawableTop="@drawable/ic_baseline_insert_chart_60"
+        android:paddingTop="14dp"
+        android:text="@string/btnStatistics"
+        android:textColor="@color/WhiteText"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnContacts" />
+
+    <Button
+        android:id="@+id/btnSettings"
+        android:layout_width="158dp"
+        android:layout_height="125dp"
+        android:layout_marginTop="@dimen/margin_wide"
+        android:layout_marginEnd="@dimen/margin_wide"
+        android:background="@drawable/mainmenu_button"
+        android:drawableTop="@drawable/ic_baseline_settings_60"
+        android:paddingTop="14dp"
+        android:text="@string/btnSettings"
+        android:textColor="@color/WhiteText"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnProjects" />
+
+
+
+
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
