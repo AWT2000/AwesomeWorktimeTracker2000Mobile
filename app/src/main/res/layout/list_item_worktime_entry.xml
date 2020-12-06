@@ -9,25 +9,44 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/default_margin"
+        android:layout_marginTop="@dimen/default_margin"
+        android:layout_marginLeft="@dimen/default_margin"
+        android:layout_marginRight="@dimen/default_margin"
+        android:background="@drawable/recyclerview_item_layout">
+
+        <TextView
+            android:id="@+id/iconClock"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:drawableStart="@drawable/ic_baseline_clock_24"
+            android:paddingStart="@dimen/default_margin"
+            android:textColor="@color/WhiteText"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/textViewProjectName" />
 
         <TextView
             android:id="@+id/textViewProjectName"
+            android:layout_marginLeft="@dimen/default_margin"
             android:layout_width="0dp"
             android:layout_height="20dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             android:textColor="@color/WhiteText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/iconClock"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="Projektiplaceholder" />
 
         <TextView
             android:id="@+id/textViewStartAndEndDatetime"
+            android:layout_marginLeft="@dimen/default_margin"
             android:layout_width="0dp"
             android:layout_height="20dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textViewProjectName"
             android:textColor="@color/WhiteText"
+            app:layout_constraintStart_toEndOf="@+id/iconClock"
+            app:layout_constraintTop_toBottomOf="@+id/textViewProjectName"
             tools:text="alku - loppu" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

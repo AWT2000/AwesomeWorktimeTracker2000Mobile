@@ -28,4 +28,5 @@
     <string name="btnProjects">Projektit</string>
     <string name="btnStatistics">Omat merkinnät</string>
     <string name="btnSettings">Asetukset</string>
+    <string name="feature_not_implemented">Ominaisuus ei vielä implementoitu.</string>
 </resources>

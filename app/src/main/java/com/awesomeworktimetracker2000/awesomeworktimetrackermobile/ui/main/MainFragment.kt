@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -40,10 +41,46 @@ class MainFragment : Fragment() {
         binding = DataBindingUtil.inflate(inflater, R.layout.main_fragment, container, false)
         binding.lifecycleOwner = this
 
-        // binding buttons to navigation paths
-        binding.btnWeekFragment.setOnClickListener{goToWeekFragment()}
 
         val application = requireNotNull(this.activity).application
+
+        // binding buttons to navigation paths
+        binding.btnWeekFragment.setOnClickListener{goToWeekFragment()}
+        binding.btnMessages.setOnClickListener{
+            Toast.makeText(
+                application,
+                getString(R.string.feature_not_implemented),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        binding.btnContacts.setOnClickListener{
+            Toast.makeText(
+                application,
+                getString(R.string.feature_not_implemented),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        binding.btnProjects.setOnClickListener{
+            Toast.makeText(
+                application,
+                getString(R.string.feature_not_implemented),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        binding.btnStatistics.setOnClickListener{
+            Toast.makeText(
+                application,
+                getString(R.string.feature_not_implemented),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        binding.btnSettings.setOnClickListener{
+            Toast.makeText(
+                application,
+                getString(R.string.feature_not_implemented),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
 
         val awtDatabase = AWTDatabase.getInstance(application)
 
