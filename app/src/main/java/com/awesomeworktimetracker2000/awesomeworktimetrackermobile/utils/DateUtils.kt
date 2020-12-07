@@ -1,5 +1,6 @@
 package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils
 
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -33,5 +34,12 @@ object DateUtils {
         calendar.add(Calendar.DAY_OF_YEAR, days)
 
         return calendar.time
+
+    fun convertLocalDateTimeToString(localDateTime: LocalDateTime): String {
+        return DateTimeFormatter.ofPattern("dd.MM.yyyy HH.mm").format(localDateTime)
+    }
+
+    fun convertOffsetDateTimeToString(dateTime: OffsetDateTime): String {
+        return DateTimeFormatter.ofPattern("dd.MM.yyyy HH.mm").format(dateTime)
     }
 }
