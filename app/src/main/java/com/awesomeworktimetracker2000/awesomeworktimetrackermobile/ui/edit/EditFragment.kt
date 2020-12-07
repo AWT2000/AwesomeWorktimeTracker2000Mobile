@@ -16,12 +16,14 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.R
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.AWTDatabase
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApi
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.databinding.EditFragmentBinding
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.ConnectionUtils
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.convertOffsetDateTimeToString
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.localOffset
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.edit.EditViewModel
@@ -40,8 +42,6 @@ class EditFragment : Fragment() {
     private var savedDay = 0;
     private var savedMonth = 0;
     private var savedYear = 0;
-
-    private lateinit var projectNames: List<String>
 
     private var start: Boolean = false
 
@@ -90,19 +90,8 @@ class EditFragment : Fragment() {
             tvEditTitle.text = editViewModel.editTitle.value.toString()
         })
 
-        editViewModel.projectNames.observe(viewLifecycleOwner, Observer { projects ->
-            this.projectNames = projects
-
-//            val spinnerAdapter = ArrayAdapter(
-//                application,
-//                android.R.layout.simple_spinner_item,
-//                projects
-//            )
-//            spnrProject.adapter = spinnerAdapter
-        })
-
         editViewModel.projects.observe(viewLifecycleOwner, Observer { listOfSpinnerOptions ->
-            val spinnerAdapter = ArrayAdapter(
+            val spinnerAdapter = ProjectSpinnerAdapter(
                 application,
                 android.R.layout.simple_spinner_item,
                 listOfSpinnerOptions
@@ -121,10 +110,19 @@ class EditFragment : Fragment() {
         })
 
         editViewModel.selectedProjectIdLive.observe(viewLifecycleOwner, Observer { projectId ->
-            val keys =
-                editViewModel.projectsMap.filterValues { it == projectId }.keys
-            Log.i("EditViewModel", "Selected project: ${keys.elementAt(0)}")
-            spnrProject.setSelection(projectNames.indexOf(keys.elementAt(0)))
+            val index = (spnrProject.adapter as ProjectSpinnerAdapter).getIndexOfItemById(projectId)
+            spnrProject.setSelection(index)
+        })
+
+        editViewModel.savedSuccesfully.observe(viewLifecycleOwner, Observer {
+            if (it) {
+                val dateTimeOffset = editViewModel.startDate
+                val dateString = DateUtils.convertOffsetDateTimeToDateString(dateTimeOffset)
+
+                val action = EditFragmentDirections.actionEditFragmentToDateFragment(dateString)
+
+                this.findNavController().navigate(action)
+            }
         })
 
         val selectedProjectId: Int = editViewModel.selectedProjectId
@@ -138,41 +136,23 @@ class EditFragment : Fragment() {
 
 
     private fun setEditViews() {
-            try {
-                val offsetDateTime: OffsetDateTime = args.date!!
-                    .toInstant()
-                    .atOffset(localOffset)
-                editViewModel.getProjects()
-                editViewModel.pickDateTime(offsetDateTime, args.worktimeEntryId)
+        try {
+            val offsetDateTime: OffsetDateTime = args.date!!
+                .toInstant()
+                .atOffset(localOffset)
 
-                // TODO: set element returned to keys variable as spnrProject value
-                //  At the moment projectsMap returns null.
-                //  suspend this until editViewModel.getProjects() has been run?
-                Log.i("EditViewModel", "editViewModel.projectsMap size: ${editViewModel.projectsMap.size}")
-//                val keys =
-//                    editViewModel.projectsMap.filterValues { it == editViewModel.selectedProjectId }.keys
-//                Log.i("EditViewModel", "Selected project: ${keys.elementAt(0).toInt()}")
-//                spnrProject.setSelection(keys.elementAt(0).toInt())
+            editViewModel.getProjects()
 
-                // TODO: startDate, endDate null at this point
-//                edit_start_datetime.text =
-//                    convertOffsetDateTimeToString(editViewModel.startDate)
-//                edit_end_datetime.text =
-//                    convertOffsetDateTimeToString(editViewModel.endDate)
+            editViewModel.pickDateTime(offsetDateTime, args.worktimeEntryId)
 
+        } catch (e: Exception) {
+            Log.i("EditFragment", "Exception: ${e.message}")
+        } finally {
 
-            } catch (e: Exception) {
-                Log.i("EditFragment", "Exception: ${e.message}")
-            } finally {
-
-            }
+        }
     }
 
     private fun setOnClickListeners() {
-
-        var startDateListener: OnDateSetListener
-        var endDateListener: OnDateSetListener
-
         binding.editStartDatetime.setOnClickListener {
             val editStartDateTime = DatePickerDialog(
                 requireNotNull(this.context),
@@ -203,8 +183,6 @@ class EditFragment : Fragment() {
 
             editViewModel.selectedProjectId = spinnerOption.project.id
 
-//            editViewModel.selectedProjectId =
-//                editViewModel.projectsMap[spnrProject.selectedItem.toString()]!!
             Log.i("selectedProjectId", "${editViewModel.selectedProjectId}")
             editViewModel.saveWorkTimeEntry()
         }
@@ -251,6 +229,7 @@ class EditFragment : Fragment() {
             edit_start_datetime.text =
                 convertOffsetDateTimeToString(editViewModel.startDate)
         }
+
     private val endTimeSetListener =
         OnTimeSetListener { _, hour, minute ->
             start = false

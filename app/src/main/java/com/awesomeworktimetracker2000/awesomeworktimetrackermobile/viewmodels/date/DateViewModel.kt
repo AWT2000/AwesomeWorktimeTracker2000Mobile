@@ -25,20 +25,24 @@ class DateViewModel(
 
     // initialize inputDate and date variables
     private var inputDate: LocalDate = LocalDate.now()
+
     var date: Date = Date.from(inputDate.atStartOfDay(DateUtils.ZoneId).toInstant())
 
     // For updating DateFragment text view to current date
     private var _currentDateString = MutableLiveData<String>()
+
     val currentDateString: LiveData<String>
         get() = _currentDateString
 
     private var finnish: Locale? = Locale("fi", "FI")
+
     private val simpleDateFormat = SimpleDateFormat("EE dd.MM.yyyy", finnish)
+
+    private var _worktimeEntries = MutableLiveData<List<WorktimeEntry>>()
 
     /**
      * Observable list of work time entries
      */
-    private var _worktimeEntries = MutableLiveData<List<WorktimeEntry>>()
     val worktimeEntries: LiveData<List<WorktimeEntry>>
         get() = _worktimeEntries
 
@@ -90,13 +94,17 @@ class DateViewModel(
      */
     fun nextDate() {
         inputDate = inputDate.plusDays(1)
+
         date = Date.from(inputDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+
         getWorkTimeEntries(date)
     }
 
     fun prevDate() {
         inputDate = inputDate.minusDays(1)
+
         date = Date.from(inputDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+
         getWorkTimeEntries(date)
     }
 

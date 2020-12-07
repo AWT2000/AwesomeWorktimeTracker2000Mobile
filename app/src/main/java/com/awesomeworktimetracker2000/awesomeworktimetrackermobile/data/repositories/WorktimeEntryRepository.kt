@@ -9,6 +9,7 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.worktimeEntries.save.SaveWorktimeEntryResponseDto
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApiService
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.ResponseStatus
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.SaveWorktimeEntryResponse
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.WorktimeEntryListing
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.WorktimeEntryResponse
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.ConnectionUtils
@@ -252,7 +253,11 @@ class WorktimeEntryRepository private constructor (
         }
     }
 
-    suspend fun addWorktimeEntry(worktimeEntry: SaveWorktimeEntryRequest) {
+    suspend fun addWorktimeEntry(worktimeEntry: SaveWorktimeEntryRequest): SaveWorktimeEntryResponse {
+        if (!connectionUtils.hasInternetConnection()) {
+            return SaveWorktimeEntryResponse(ResponseStatus.OFFLINE)
+        }
+
         Log.i("worktimeEntries", "WorktimeEntryRepository@addWorktimeEntry")
         val response = apiService.addWorktimeEntry(
             "Bearer $token",
@@ -262,71 +267,82 @@ class WorktimeEntryRepository private constructor (
                 ended_at = worktimeEntry.ended_at
             )
         )
-        handleSaveWorktimeEntryResponse(response)
+        return handleSaveWorktimeEntryResponse(response)
     }
 
     suspend fun deleteWorktimeEntry(externalId: Int) {
+        if (!connectionUtils.hasInternetConnection()) {
+            return
+        }
+
         Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry")
 
+        val response = apiService.deleteWorktimeEntry(
+            token = "Bearer $token",
+            id = externalId
+        )
 
-            val response = apiService.deleteWorktimeEntry(
-                token = "Bearer $token",
-                id = externalId
-            )
+        if (response.isSuccessful) {
+            Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry response.isSuccessful!")
+        } else {
+            Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry response.code: " + response.code())
+            if (response.code() != 404 && response.code() != 401) {
+                response.errorBody()?.let {
+                    val errorJson = JSONObject(it.toString())
 
-            if (response.isSuccessful) {
-                Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry response.isSuccessful!")
-            } else {
-                Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry response.code: " + response.code())
-                if (response.code() != 404 && response.code() != 401) {
-                    response.errorBody()?.let {
-                        val errorJson = JSONObject(it.toString())
-                        val error = errorJson.getJSONObject("errors").toString()
-                        Log.i(
-                            "worktimeEntries",
-                            "WorktimeEntryRepository@deleteWorktimeEntry, response error body: $error"
-                        )
-                    }
+                    val error = errorJson.getJSONObject("errors").toString()
+
+                    Log.i(
+                        "worktimeEntries",
+                        "WorktimeEntryRepository@deleteWorktimeEntry, response error body: $error"
+                    )
                 }
             }
+        }
     }
 
-    suspend fun updateWorktimeEntry(id: Int, worktimeEntry: SaveWorktimeEntryRequest) {
+    suspend fun updateWorktimeEntry(id: Int, worktimeEntry: SaveWorktimeEntryRequest): SaveWorktimeEntryResponse {
+        if (!connectionUtils.hasInternetConnection()) {
+            return SaveWorktimeEntryResponse(ResponseStatus.OFFLINE)
+        }
+
         Log.i("worktimeEntries", "WorktimeEntryRepository@updateWorktimeEntry")
 
-
-            val response = apiService.updateWorktimeEntry(
-                token = "Bearer $token",
-                id = id,
-                worktimeEntry = SaveWorktimeEntryRequest(
-                    project_id = worktimeEntry.project_id,
-                    started_at = worktimeEntry.started_at,
-                    ended_at = worktimeEntry.ended_at
-                )
+        val response = apiService.updateWorktimeEntry(
+            token = "Bearer $token",
+            id = id,
+            worktimeEntry = SaveWorktimeEntryRequest(
+                project_id = worktimeEntry.project_id,
+                started_at = worktimeEntry.started_at,
+                ended_at = worktimeEntry.ended_at
             )
-            handleSaveWorktimeEntryResponse(response);
+        )
 
+        return handleSaveWorktimeEntryResponse(response);
     }
 
-    private fun handleSaveWorktimeEntryResponse(response: Response<SaveWorktimeEntryResponseDto>) {
+    private fun handleSaveWorktimeEntryResponse(
+        response: Response<SaveWorktimeEntryResponseDto>,
+        localId: Int = 0
+    ): SaveWorktimeEntryResponse {
         if (response.isSuccessful) {
             val entryFromApi = response.body()!!
+
             Log.i("worktimeEntries", "WorktimeEntryRepository@handleSaveWorktimeEntryResponse response.isSuccessful!! external_id: ${entryFromApi.id}")
 
             Log.i("worktimeEntries", "entryFromApi.started_at: ${entryFromApi.started_at}")
             Log.i("worktimeEntries", "entryFromApi.ended_at: ${entryFromApi.ended_at}")
 
-//            addEntryToDb(
-//                WorktimeEntry(
-//                    id = localId,
-//                    externalId = entryFromApi.id,
-//                    projectId = entryFromApi.project_id,
-//                    startedAt = entryFromApi.started_at,
-//                    endedAt = entryFromApi.ended_at,
-//                    synced = true
-//                )
-//            )
-
+            return SaveWorktimeEntryResponse(
+                status = ResponseStatus.OK,
+                worktimeEntry = WorktimeEntry(
+                    id = localId,
+                    externalId = entryFromApi.id,
+                    projectId = entryFromApi.project_id,
+                    startedAt = DateUtils.convertStringToOffsetDateTimeObject(entryFromApi.started_at),
+                    endedAt = DateUtils.convertStringToOffsetDateTimeObject(entryFromApi.ended_at)
+                )
+            )
         } else {
             Log.i("worktimeEntries", "WorktimeEntryRepository@handleSaveWorktimeEntryResponse response.code: " + response.code())
             if (response.code() != 404 && response.code() != 401) {
@@ -339,6 +355,8 @@ class WorktimeEntryRepository private constructor (
                     )
                 }
             }
+
+            return SaveWorktimeEntryResponse(ResponseStatus.UNDEFINEDERROR)
         }
     }
 
@@ -393,8 +411,9 @@ class WorktimeEntryRepository private constructor (
         }
     }
 
-    suspend fun updateEntryToDb(entry: DatabaseWorktimeEntry): WorktimeEntry {
+    private suspend fun updateEntryToDb(entry: DatabaseWorktimeEntry): WorktimeEntry {
         worktimeEntryDao.updateWorktimeEntry(entry)
+
         return WorktimeEntry(
             id = entry.id,
             startedAt = entry.startedAt,
