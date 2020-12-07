@@ -7,6 +7,7 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.reposito
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.services.DataSyncService
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.ConnectionUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class MainViewModel(
@@ -24,10 +25,12 @@ class MainViewModel(
      * Call data sync service to sync data between local db and cloud service.
      */
     fun syncData() {
-        viewModelScope.launch(Dispatchers.IO) {
-            dataSyncService.syncUnsyncedWorktimeEntries()
-            dataSyncService.syncWorktimeEntriesFromApiToLocalDb()
-            dataSyncService.syncProjects()
+        if (connectionUtils.hasInternetConnection()) {
+            GlobalScope.launch(Dispatchers.IO) {
+                dataSyncService.syncUnsyncedWorktimeEntries()
+                dataSyncService.syncWorktimeEntriesFromApiToLocalDb()
+                dataSyncService.syncProjects()
+            }
         }
     }
 }

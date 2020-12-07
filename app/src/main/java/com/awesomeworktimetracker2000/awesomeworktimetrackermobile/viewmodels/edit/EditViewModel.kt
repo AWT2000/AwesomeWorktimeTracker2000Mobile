@@ -16,6 +16,7 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.ui.edit.Proje
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.isoDateFormatter
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.localOffset
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -115,7 +116,7 @@ class EditViewModel(
         /**
          * update workTimeEntry
          */
-        if (this@EditViewModel.worktimeEntryId != 0 && this@EditViewModel.externalId != 0) {
+        if (this@EditViewModel.worktimeEntryId != 0 || this@EditViewModel.externalId != 0) {
 
             val workTimeEntry = WorktimeEntry(
                 id = this@EditViewModel.worktimeEntryId,
@@ -133,7 +134,7 @@ class EditViewModel(
                 _savedSuccessfully.postValue(true)
             }
 
-            viewModelScope.launch(Dispatchers.IO) {
+            GlobalScope.launch(Dispatchers.IO) {
                 Log.i("EditViewModel", "Updating apiDB entry...")
                 val saveResponse = worktimeEntryRepository.updateWorktimeEntry(this@EditViewModel.externalId, saveWorkTimeEntry)
 
@@ -169,9 +170,10 @@ class EditViewModel(
                 Log.i("EditViewModel", "Adding localDB entry...")
                 workTimeEntry = worktimeEntryRepository.addEntryToDb(workTimeEntry)
                 Log.i("EditViewModel", "added entry id: ${workTimeEntry.id}")
+                _savedSuccessfully.postValue(true)
             }
 
-            viewModelScope.launch(Dispatchers.IO) {
+            GlobalScope.launch(Dispatchers.IO) {
                 Log.i("EditViewModel", "Adding apiDB entry...")
                 val saveResponse = worktimeEntryRepository.addWorktimeEntry(saveWorkTimeEntry)
 
@@ -236,7 +238,9 @@ class EditViewModel(
 
                     this@EditViewModel.worktimeEntryId = worktimeEntry.id
 
-                    this@EditViewModel.externalId = worktimeEntry.externalId!!
+                    if (worktimeEntry.externalId != null) {
+                        this@EditViewModel.externalId = worktimeEntry.externalId!!
+                    }
 
                     startDate = worktimeEntry.startedAt.withOffsetSameInstant(localOffset)
 

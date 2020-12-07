@@ -377,7 +377,7 @@ class WorktimeEntryRepository private constructor (
                     endedAt = entry.endedAt,
                     projectId = entry.projectId,
                     externalId = entry.externalId,
-                    synced = true,
+                    synced = entry.synced,
                     syncedAt = OffsetDateTime.now()
                 ))
             }
@@ -392,7 +392,7 @@ class WorktimeEntryRepository private constructor (
                     endedAt = entry.endedAt,
                     projectId = entry.projectId,
                     externalId = entry.externalId,
-                    synced = true,
+                    synced = entry.synced,
                     syncedAt = OffsetDateTime.now()
                 )
             )
@@ -403,7 +403,7 @@ class WorktimeEntryRepository private constructor (
                 endedAt = entry.endedAt,
                 projectId = entry.projectId,
                 externalId = entry.externalId,
-                synced = true
+                synced = entry.synced
             )
         } catch (e: Exception) {
             Log.i("WorktimeEntryRepository", "@addEntryToDb exception: " + e.message)
@@ -420,7 +420,7 @@ class WorktimeEntryRepository private constructor (
             endedAt = entry.endedAt,
             projectId = entry.projectId,
             externalId = entry.externalId,
-            synced = true
+            synced = entry.synced
         )
     }
 
