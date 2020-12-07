@@ -5,6 +5,8 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.daos.WorktimeEntryDao
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.entities.DatabaseWorktimeEntry
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.WorktimeEntry
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.worktimeEntries.SaveWorktimeEntryRequest
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.responseObjects.worktimeEntries.save.SaveWorktimeEntryResponseDto
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApiService
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.ResponseStatus
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.WorktimeEntryListing
@@ -13,6 +15,8 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.Connect
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.json.JSONObject
+import retrofit2.Response
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
@@ -248,107 +252,102 @@ class WorktimeEntryRepository private constructor (
         }
     }
 
-//    val tempEntry = MutableLiveData<WorktimeEntry>(null)
-//
-//    suspend fun addWorktimeEntry() {
-//        Log.i("worktimeEntries", "WorktimeEntryRepository@addWorktimeEntry")
-//        val response = apiService.addWorktimeEntry(
-//            "Bearer $token",
-//            SaveWorktimeEntryRequest(
-//                started_at = "2020-01-01T08:00:00+02:00",
-//                ended_at = "2020-01-01T16:00:00+02:00"
-//            )
-//        )
-//        handleSaveWorktimeEntryResponse(response)
-//    }
-//
-//    suspend fun deleteWorktimeEntry() {
-//        Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry")
-//        if (tempEntry.value != null) {
-//            val entry = tempEntry.value!!
-//
-//            val response = apiService.deleteWorktimeEntry(
-//                token = "Bearer $token",
-//                id = entry.externalId!!
-//            )
-//
-//            if (response.isSuccessful) {
-//                Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry response.isSuccessful!")
-//            } else {
-//                Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry response.code: " + response.code())
-//                if (response.code() != 404 && response.code() != 401) {
-//                    response.errorBody()?.let {
-//                        val errorJson = JSONObject(it.toString())
-//                        val error = errorJson.getJSONObject("errors").toString()
-//                        Log.i(
-//                            "worktimeEntries",
-//                            "WorktimeEntryRepository@deleteWorktimeEntry, response error body: $error"
-//                        )
-//                    }
-//                }
-//            }
-//            tempEntry.postValue(null)
-//        }
-//    }
-//
-//    suspend fun updateWorktimeEntry() {
-//        Log.i("worktimeEntries", "WorktimeEntryRepository@updateWorktimeEntry")
-//        if (tempEntry.value != null) {
-//            val entry = tempEntry.value!!
-//            val response = apiService.updateWorktimeEntry(
-//                token = "Bearer $token",
-//                id = entry.externalId!!,
-//                worktimeEntry = SaveWorktimeEntryRequest(
-//                    started_at = entry.startedAt.plusHours(5).format(formatter),
-//                    ended_at = entry.endedAt.plusHours(5).format(formatter)
+    suspend fun addWorktimeEntry(worktimeEntry: SaveWorktimeEntryRequest) {
+        Log.i("worktimeEntries", "WorktimeEntryRepository@addWorktimeEntry")
+        val response = apiService.addWorktimeEntry(
+            "Bearer $token",
+            SaveWorktimeEntryRequest(
+                project_id = worktimeEntry.project_id,
+                started_at = worktimeEntry.started_at,
+                ended_at = worktimeEntry.ended_at
+            )
+        )
+        handleSaveWorktimeEntryResponse(response)
+    }
+
+    suspend fun deleteWorktimeEntry(externalId: Int) {
+        Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry")
+
+
+            val response = apiService.deleteWorktimeEntry(
+                token = "Bearer $token",
+                id = externalId
+            )
+
+            if (response.isSuccessful) {
+                Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry response.isSuccessful!")
+            } else {
+                Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry response.code: " + response.code())
+                if (response.code() != 404 && response.code() != 401) {
+                    response.errorBody()?.let {
+                        val errorJson = JSONObject(it.toString())
+                        val error = errorJson.getJSONObject("errors").toString()
+                        Log.i(
+                            "worktimeEntries",
+                            "WorktimeEntryRepository@deleteWorktimeEntry, response error body: $error"
+                        )
+                    }
+                }
+            }
+    }
+
+    suspend fun updateWorktimeEntry(id: Int, worktimeEntry: SaveWorktimeEntryRequest) {
+        Log.i("worktimeEntries", "WorktimeEntryRepository@updateWorktimeEntry")
+
+
+            val response = apiService.updateWorktimeEntry(
+                token = "Bearer $token",
+                id = id,
+                worktimeEntry = SaveWorktimeEntryRequest(
+                    project_id = worktimeEntry.project_id,
+                    started_at = worktimeEntry.started_at,
+                    ended_at = worktimeEntry.ended_at
+                )
+            )
+            handleSaveWorktimeEntryResponse(response);
+
+    }
+
+    private fun handleSaveWorktimeEntryResponse(response: Response<SaveWorktimeEntryResponseDto>) {
+        if (response.isSuccessful) {
+            val entryFromApi = response.body()!!
+            Log.i("worktimeEntries", "WorktimeEntryRepository@handleSaveWorktimeEntryResponse response.isSuccessful!! external_id: ${entryFromApi.id}")
+
+            Log.i("worktimeEntries", "entryFromApi.started_at: ${entryFromApi.started_at}")
+            Log.i("worktimeEntries", "entryFromApi.ended_at: ${entryFromApi.ended_at}")
+
+//            addEntryToDb(
+//                WorktimeEntry(
+//                    id = localId,
+//                    externalId = entryFromApi.id,
+//                    projectId = entryFromApi.project_id,
+//                    startedAt = entryFromApi.started_at,
+//                    endedAt = entryFromApi.ended_at,
+//                    synced = true
 //                )
 //            )
-//            handleSaveWorktimeEntryResponse(response);
-//        }
-//    }
-//
-//    private fun handleSaveWorktimeEntryResponse(response: Response<SaveWorktimeEntryResponseDto>) {
-//        if (response.isSuccessful) {
-//            val entryFromApi = response.body()!!
-//            Log.i("worktimeEntries", "WorktimeEntryRepository@handleSaveWorktimeEntryResponse response.isSuccessful!! external_id: ${entryFromApi.id}")
-//
-//            Log.i("worktimeEntries", "entryFromApi.started_at: ${entryFromApi.started_at}")
-//            Log.i("worktimeEntries", "entryFromApi.ended_at: ${entryFromApi.ended_at}")
-//
-//            tempEntry.postValue(WorktimeEntry(
-//                    id =0,
-//                    startedAt = OffsetDateTime
-//                        .parse(entryFromApi.started_at)
-//                        .withOffsetSameInstant(localOffset),
-//                    endedAt = OffsetDateTime
-//                        .parse(entryFromApi.ended_at)
-//                        .withOffsetSameInstant(localOffset),
-//                    projectId = entryFromApi.project_id,
-//                    externalId = entryFromApi.id,
-//                    synced = true
-//                ))
-//        } else {
-//            Log.i("worktimeEntries", "WorktimeEntryRepository@handleSaveWorktimeEntryResponse response.code: " + response.code())
-//            if (response.code() != 404 && response.code() != 401) {
-//                response.errorBody()?.let {
-//                    val errorJson = JSONObject(it.toString())
-//                    val error = errorJson.getJSONObject("errors").toString()
-//                    Log.i(
-//                        "worktimeEntries",
-//                        "WorktimeEntryRepository@deleteWorktimeEntry, response error body: $error"
-//                    )
-//                }
-//            }
-//        }
-//    }
+
+        } else {
+            Log.i("worktimeEntries", "WorktimeEntryRepository@handleSaveWorktimeEntryResponse response.code: " + response.code())
+            if (response.code() != 404 && response.code() != 401) {
+                response.errorBody()?.let {
+                    val errorJson = JSONObject(it.toString())
+                    val error = errorJson.getJSONObject("errors").toString()
+                    Log.i(
+                        "worktimeEntries",
+                        "WorktimeEntryRepository@deleteWorktimeEntry, response error body: $error"
+                    )
+                }
+            }
+        }
+    }
 
     /**
      * Checks if entry already exists, and adds or updates entry to db.
      *
      * @param entry work time entry to add or update.
      */
-    private suspend fun addEntryToDb(entry: WorktimeEntry): WorktimeEntry {
-
+    suspend fun addEntryToDb(entry: WorktimeEntry): WorktimeEntry {
         if (entry.externalId != null) {
             val existingEntry = worktimeEntryDao.getWorktimeEntryByExternalId(userId, entry.externalId)
 
@@ -394,7 +393,7 @@ class WorktimeEntryRepository private constructor (
         }
     }
 
-    private suspend fun updateEntryToDb(entry: DatabaseWorktimeEntry): WorktimeEntry {
+    suspend fun updateEntryToDb(entry: DatabaseWorktimeEntry): WorktimeEntry {
         worktimeEntryDao.updateWorktimeEntry(entry)
         return WorktimeEntry(
             id = entry.id,
@@ -404,5 +403,12 @@ class WorktimeEntryRepository private constructor (
             externalId = entry.externalId,
             synced = true
         )
+    }
+    suspend fun deleteEntryFromDb(id: Int) {
+        val existingEntry = worktimeEntryDao.getWorktimeEntryByExternalId(userId, id)
+        if (existingEntry != null) {
+            worktimeEntryDao.deleteWorktimeEntry(id)
+        }
+
     }
 }
