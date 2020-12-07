@@ -34,7 +34,7 @@ object DateUtils {
         calendar.add(Calendar.DAY_OF_YEAR, days)
 
         return calendar.time
-
+    }
     fun convertLocalDateTimeToString(localDateTime: LocalDateTime): String {
         return DateTimeFormatter.ofPattern("dd.MM.yyyy HH.mm").format(localDateTime)
     }
