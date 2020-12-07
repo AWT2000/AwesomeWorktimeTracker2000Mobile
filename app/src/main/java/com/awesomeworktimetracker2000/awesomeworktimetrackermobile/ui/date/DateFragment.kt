@@ -114,10 +114,12 @@ class DateFragment : Fragment() {
     private fun goToEditFragment(entryId: Int? = null) {
 
         val passableWorktimeEntryId = entryId ?: 0
+        val passableCurrentDate = dateViewModel.date
 
         val action = DateFragmentDirections
             .actionDateFragmentToEditFragment()
             .setWorktimeEntryId(passableWorktimeEntryId)
+            .setDate(passableCurrentDate)
 
         this.findNavController().navigate(action);
     }
