@@ -404,11 +404,12 @@ class WorktimeEntryRepository private constructor (
             synced = true
         )
     }
+
     suspend fun deleteEntryFromDb(id: Int) {
         val existingEntry = worktimeEntryDao.getWorktimeEntryByExternalId(userId, id)
+
         if (existingEntry != null) {
             worktimeEntryDao.deleteWorktimeEntry(id)
         }
-
     }
 }

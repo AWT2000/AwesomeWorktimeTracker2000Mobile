@@ -12,20 +12,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.DatePicker
-import android.widget.TimePicker
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.R
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.AWTDatabase
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.services.AWTApi
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.databinding.EditFragmentBinding
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.ConnectionUtils
-import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.convertOffsetDateTimeToString
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.localOffset
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.edit.EditViewModel
@@ -44,6 +40,8 @@ class EditFragment : Fragment() {
     private var savedDay = 0;
     private var savedMonth = 0;
     private var savedYear = 0;
+
+    private lateinit var projectNames: List<String>
 
     private var start: Boolean = false
 
@@ -93,12 +91,40 @@ class EditFragment : Fragment() {
         })
 
         editViewModel.projectNames.observe(viewLifecycleOwner, Observer { projects ->
+            this.projectNames = projects
+
+//            val spinnerAdapter = ArrayAdapter(
+//                application,
+//                android.R.layout.simple_spinner_item,
+//                projects
+//            )
+//            spnrProject.adapter = spinnerAdapter
+        })
+
+        editViewModel.projects.observe(viewLifecycleOwner, Observer { listOfSpinnerOptions ->
             val spinnerAdapter = ArrayAdapter(
                 application,
                 android.R.layout.simple_spinner_item,
-                projects
+                listOfSpinnerOptions
             )
             spnrProject.adapter = spinnerAdapter
+        })
+
+        editViewModel.start.observe(viewLifecycleOwner, Observer {
+            edit_start_datetime.text =
+                convertOffsetDateTimeToString(it)
+        })
+
+        editViewModel.end.observe(viewLifecycleOwner, Observer {
+            edit_end_datetime.text =
+                convertOffsetDateTimeToString(it)
+        })
+
+        editViewModel.selectedProjectIdLive.observe(viewLifecycleOwner, Observer { projectId ->
+            val keys =
+                editViewModel.projectsMap.filterValues { it == projectId }.keys
+            Log.i("EditViewModel", "Selected project: ${keys.elementAt(0)}")
+            spnrProject.setSelection(projectNames.indexOf(keys.elementAt(0)))
         })
 
         val selectedProjectId: Int = editViewModel.selectedProjectId
@@ -123,16 +149,16 @@ class EditFragment : Fragment() {
                 //  At the moment projectsMap returns null.
                 //  suspend this until editViewModel.getProjects() has been run?
                 Log.i("EditViewModel", "editViewModel.projectsMap size: ${editViewModel.projectsMap.size}")
-                val keys =
-                    editViewModel.projectsMap.filterValues { it == editViewModel.selectedProjectId }.keys
-                Log.i("EditViewModel", "Selected project: ${keys.elementAt(0).toInt()}")
-                spnrProject.setSelection(keys.elementAt(0).toInt())
+//                val keys =
+//                    editViewModel.projectsMap.filterValues { it == editViewModel.selectedProjectId }.keys
+//                Log.i("EditViewModel", "Selected project: ${keys.elementAt(0).toInt()}")
+//                spnrProject.setSelection(keys.elementAt(0).toInt())
 
                 // TODO: startDate, endDate null at this point
-                edit_start_datetime.text =
-                    convertOffsetDateTimeToString(editViewModel.startDate)
-                edit_end_datetime.text =
-                    convertOffsetDateTimeToString(editViewModel.endDate)
+//                edit_start_datetime.text =
+//                    convertOffsetDateTimeToString(editViewModel.startDate)
+//                edit_end_datetime.text =
+//                    convertOffsetDateTimeToString(editViewModel.endDate)
 
 
             } catch (e: Exception) {
@@ -173,8 +199,12 @@ class EditFragment : Fragment() {
             Log.i("buttonSave", "${editViewModel.startDate}")
             Log.i("buttonSave", "${editViewModel.endDate}")
 
-            editViewModel.selectedProjectId =
-                editViewModel.projectsMap[spnrProject.selectedItem.toString()]!!
+            val spinnerOption = spnrProject.selectedItem as ProjectSpinnerOption
+
+            editViewModel.selectedProjectId = spinnerOption.project.id
+
+//            editViewModel.selectedProjectId =
+//                editViewModel.projectsMap[spnrProject.selectedItem.toString()]!!
             Log.i("selectedProjectId", "${editViewModel.selectedProjectId}")
             editViewModel.saveWorkTimeEntry()
         }
