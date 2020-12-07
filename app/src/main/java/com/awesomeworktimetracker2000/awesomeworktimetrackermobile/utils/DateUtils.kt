@@ -22,6 +22,15 @@ object DateUtils {
     }
 
     /**
+     * Convert OffsetDateTime to date string, e.g. 2020-12-06
+     */
+    fun convertOffsetDateTimeToDateString(dateTime: OffsetDateTime): String {
+        val localDateTime = dateTime.withOffsetSameInstant(localOffset)
+
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd").format(localDateTime)
+    }
+
+    /**
      * Get date object + or - days from today.
      *
      * e.g.
@@ -41,5 +50,9 @@ object DateUtils {
 
     fun convertOffsetDateTimeToString(dateTime: OffsetDateTime): String {
         return DateTimeFormatter.ofPattern("dd.MM.yyyy HH.mm").format(dateTime)
+    }
+
+    fun convertStringToOffsetDateTimeObject(dateString: String): OffsetDateTime {
+        return OffsetDateTime.parse(dateString).withOffsetSameInstant(localOffset)
     }
 }

@@ -88,5 +88,10 @@
             app:argType="java.util.Date"
             app:nullable="true"
             android:defaultValue="@null" />
+        <action
+            android:id="@+id/action_editFragment_to_dateFragment"
+            app:destination="@id/dateFragment"
+            app:popUpTo="@id/weekFragment"
+            app:popUpToInclusive="false" />
     </fragment>
 </navigation>

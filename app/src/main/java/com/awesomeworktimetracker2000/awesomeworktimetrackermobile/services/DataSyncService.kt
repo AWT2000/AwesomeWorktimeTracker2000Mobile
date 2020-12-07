@@ -1,5 +1,8 @@
 package com.awesomeworktimetracker2000.awesomeworktimetrackermobile.services
 
+import android.util.Log
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.WorktimeEntry
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.worktimeEntries.SaveWorktimeEntryRequest
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.ProjectRepository
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.WorktimeEntryRepository
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.ResponseStatus
@@ -46,8 +49,52 @@ class DataSyncService private constructor(
             && connectionUtils.hasInternetConnection())
         {
             unsyncedWorktimeEntryListing.worktimeEntries?.let {
+                Log.i("sync", it.size.toString())
+
                 it.forEach { entry ->
-                    // TODO: use worktime entry repo to send unsynced entry to api and update db
+                    val saveWorkTimeEntry = SaveWorktimeEntryRequest(
+                        project_id = entry.projectId,
+                        started_at = entry.startedAt.format(DateUtils.isoDateFormatter),
+                        ended_at = entry.endedAt.format(DateUtils.isoDateFormatter)
+                    )
+
+                    if (entry.externalId == null) {
+
+
+                        if (connectionUtils.hasInternetConnection()) {
+                            val saveResponse = worktimeEntryRepository.addWorktimeEntry(saveWorkTimeEntry)
+
+                            if (saveResponse.status == ResponseStatus.OK) {
+                                worktimeEntryRepository.addEntryToDb(
+                                    WorktimeEntry(
+                                        id = entry.id,
+                                        externalId = saveResponse.worktimeEntry!!.externalId,
+                                        projectId = entry.projectId,
+                                        startedAt = entry.startedAt,
+                                        endedAt = entry.endedAt,
+                                        synced = true
+                                    )
+                                )
+                            }
+                        }
+                    } else {
+                        if (connectionUtils.hasInternetConnection()) {
+                            val saveResponse = worktimeEntryRepository.updateWorktimeEntry(entry.externalId, saveWorkTimeEntry)
+
+                            if (saveResponse.status == ResponseStatus.OK) {
+                                worktimeEntryRepository.addEntryToDb(
+                                    WorktimeEntry(
+                                        id = entry.id,
+                                        externalId = saveResponse.worktimeEntry!!.externalId,
+                                        projectId = entry.projectId,
+                                        startedAt = entry.startedAt,
+                                        endedAt = entry.endedAt,
+                                        synced = true
+                                    )
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

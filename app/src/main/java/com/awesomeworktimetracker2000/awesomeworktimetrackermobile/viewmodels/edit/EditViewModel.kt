@@ -6,23 +6,21 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.entities.DatabaseWorktimeEntry
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.Project
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.models.WorktimeEntry
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.network.requestObjects.worktimeEntries.SaveWorktimeEntryRequest
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.ProjectRepository
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.WorktimeEntryRepository
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.repositories.wrappers.ResponseStatus
-import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils
-import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.ZoneId
+import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.ui.edit.ProjectSpinnerOption
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.isoDateFormatter
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.utils.DateUtils.localOffset
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.util.*
 import kotlin.collections.HashMap
-import kotlin.time.minutes
 
 class EditViewModel(
     private val worktimeEntryRepository: WorktimeEntryRepository,
@@ -40,19 +38,28 @@ class EditViewModel(
     var startDate: OffsetDateTime = OffsetDateTime.now(localOffset)
     var endDate: OffsetDateTime = OffsetDateTime.now(localOffset)
 
+    var start = MutableLiveData<OffsetDateTime>()
+    var end = MutableLiveData<OffsetDateTime>()
+
     /**
      * Observable lists of project id's and names for spnrProject
      */
     private var _projectNames = MutableLiveData<List<String>>()
-    val projectNames: LiveData<List<String>>
-        get() = _projectNames
 
-    var projectsMap: MutableMap<String, Int> = HashMap()
+    val projects = MutableLiveData<List<ProjectSpinnerOption>>()
+
     var selectedProjectId: Int = 0
+
+    var selectedProjectIdLive = MutableLiveData<Int>()
 
     init {
         Log.i("EditViewModel", "EditViewModel created")
     }
+
+    private var _savedSuccessfully = MutableLiveData<Boolean>(false)
+
+    val savedSuccesfully: LiveData<Boolean>
+        get() = _savedSuccessfully
 
     /**
      * get names and id:s of all projects
@@ -60,16 +67,29 @@ class EditViewModel(
      */
     fun getProjects() {
         viewModelScope.launch(Dispatchers.IO) {
-
             val projectsListing = projectRepository.getProjects()
 
-            if (projectsListing.status == ResponseStatus.OK || projectsListing.status == ResponseStatus.OFFLINE) {
+            if (projectsListing.status == ResponseStatus.OK
+                || projectsListing.status == ResponseStatus.OFFLINE)
+            {
                 if (projectsListing.projects != null) {
+
+                    val projectList = mutableListOf<ProjectSpinnerOption>(
+                        ProjectSpinnerOption(
+                            Project(
+                                id = -1,
+                                name = "Muu Työ",
+                                founder = null,
+                                project_manager = null,
+                                synced = true
+                            ))
+                    )
+
                     projectsListing.projects.forEach { it ->
-                        projectsMap[it.name] = it.id
+                        projectList.add(ProjectSpinnerOption(it))
                     }
-                    _projectNames.postValue(projectsMap.keys.toList())
-                    Log.i("projectsMap", "${projectsMap}")
+
+                    projects.postValue(projectList)
                 }
             }
             // TODO: handling other statuses e.g. ResponseStatus.OFFLINE, ResponseStatus.UNAUTHORIZED, ResponseStatus.UNDEFINEDERROR
@@ -81,8 +101,14 @@ class EditViewModel(
      */
     fun saveWorkTimeEntry() {
 
+        var projectId: Int? = null
+
+        if (selectedProjectId > 0) {
+            projectId = selectedProjectId
+        }
+
         val saveWorkTimeEntry = SaveWorktimeEntryRequest(
-            project_id = selectedProjectId,
+            project_id = projectId,
             started_at = startDate.format(isoDateFormatter),
             ended_at = endDate.format(isoDateFormatter)
         )
@@ -90,65 +116,94 @@ class EditViewModel(
         /**
          * update workTimeEntry
          */
-        if (this@EditViewModel.worktimeEntryId != 0 && this@EditViewModel.externalId != 0) {
+        if (this@EditViewModel.worktimeEntryId != 0 || this@EditViewModel.externalId != 0) {
 
-            // TODO: userId = 0 ?
-            val workTimeDatabaseEntry = DatabaseWorktimeEntry(
+            val workTimeEntry = WorktimeEntry(
                 id = this@EditViewModel.worktimeEntryId,
-                userId = 0,
                 startedAt = startDate,
                 endedAt = endDate,
-                projectId = selectedProjectId,
-                externalId = 0
+                projectId = projectId,
+                externalId = this@EditViewModel.externalId,
+                synced = false
             )
+
             viewModelScope.launch(Dispatchers.IO) {
                 Log.i("EditViewModel", "Updating localDB entry...")
-                var workTimeEntry: WorktimeEntry = worktimeEntryRepository.updateEntryToDb(workTimeDatabaseEntry)
+                var workTimeEntry: WorktimeEntry = worktimeEntryRepository.addEntryToDb(workTimeEntry)
                 Log.i("EditViewModel", "updated entry id: ${workTimeEntry.id}")
+                _savedSuccessfully.postValue(true)
             }
-            viewModelScope.launch(Dispatchers.IO) {
+
+            GlobalScope.launch(Dispatchers.IO) {
                 Log.i("EditViewModel", "Updating apiDB entry...")
-                worktimeEntryRepository.updateWorktimeEntry(this@EditViewModel.externalId, saveWorkTimeEntry)
+                val saveResponse = worktimeEntryRepository.updateWorktimeEntry(this@EditViewModel.externalId, saveWorkTimeEntry)
+
+                if (saveResponse.status == ResponseStatus.OK) {
+                    worktimeEntryRepository.addEntryToDb(
+                        WorktimeEntry(
+                            id = workTimeEntry.id,
+                            externalId = saveResponse.worktimeEntry!!.externalId,
+                            projectId = projectId,
+                            startedAt = workTimeEntry.startedAt,
+                            endedAt = workTimeEntry.endedAt,
+                            synced = true
+                        )
+                    )
+                }
             }
         }
 
         /**
          *  new workTimeEntry
-          */
+         */
         else {
             var workTimeEntry = WorktimeEntry(
                 id = 0,
                 startedAt = startDate,
                 endedAt = endDate,
-                projectId = selectedProjectId,
-                externalId = null
+                projectId = projectId,
+                externalId = null,
+                synced = false
             )
-
 
             viewModelScope.launch(Dispatchers.IO) {
                 Log.i("EditViewModel", "Adding localDB entry...")
                 workTimeEntry = worktimeEntryRepository.addEntryToDb(workTimeEntry)
                 Log.i("EditViewModel", "added entry id: ${workTimeEntry.id}")
-            }
-            viewModelScope.launch(Dispatchers.IO) {
-                Log.i("EditViewModel", "Adding apiDB entry...")
-                worktimeEntryRepository.addWorktimeEntry(saveWorkTimeEntry)
+                _savedSuccessfully.postValue(true)
             }
 
+            GlobalScope.launch(Dispatchers.IO) {
+                Log.i("EditViewModel", "Adding apiDB entry...")
+                val saveResponse = worktimeEntryRepository.addWorktimeEntry(saveWorkTimeEntry)
+
+                if (saveResponse.status == ResponseStatus.OK) {
+                    worktimeEntryRepository.addEntryToDb(
+                        WorktimeEntry(
+                            id = workTimeEntry.id,
+                            externalId = saveResponse.worktimeEntry!!.externalId,
+                            projectId = projectId,
+                            startedAt = workTimeEntry.startedAt,
+                            endedAt = workTimeEntry.endedAt,
+                            synced = true
+                        )
+                    )
+                }
+            }
         }
-        }
+    }
+
     fun deleteWorkTimeEntry() {
         viewModelScope.launch(Dispatchers.IO) {
             Log.i("EditViewModel", "Deleting localDB entry...")
             worktimeEntryRepository.deleteEntryFromDb(this@EditViewModel.worktimeEntryId)
         }
+
         viewModelScope.launch(Dispatchers.IO) {
             Log.i("EditViewModel", "Deleting apiDB entry...")
             worktimeEntryRepository.deleteWorktimeEntry(this@EditViewModel.externalId)
         }
-
     }
-
 
     /**
      *  set startDate and endDate to current date(from DateFragment)
@@ -179,14 +234,27 @@ class EditViewModel(
                 ) {
                     Log.i("editViewModel", worktimeEntryResponse.entry!!.id.toString())
 
-                    this@EditViewModel.worktimeEntry = worktimeEntryResponse.entry!!
+                    this@EditViewModel.worktimeEntry = worktimeEntryResponse.entry
+
                     this@EditViewModel.worktimeEntryId = worktimeEntry.id
-                    this@EditViewModel.externalId = worktimeEntry.externalId!!
+
+                    if (worktimeEntry.externalId != null) {
+                        this@EditViewModel.externalId = worktimeEntry.externalId!!
+                    }
+
                     startDate = worktimeEntry.startedAt.withOffsetSameInstant(localOffset)
+
                     endDate = worktimeEntry.endedAt.withOffsetSameInstant(localOffset)
+
+                    start.postValue(startDate)
+
+                    end.postValue(endDate)
 
                     if (worktimeEntry.projectId != null) {
                         this@EditViewModel.selectedProjectId = worktimeEntry.projectId!!
+
+                        this@EditViewModel.selectedProjectIdLive.postValue(worktimeEntry.projectId!!)
+
                         Log.i("selectedProjectId", "$selectedProjectId")
                     }
 
@@ -199,10 +267,14 @@ class EditViewModel(
         }
         else {
             _editTitle.postValue("Lisää")
+
             this@EditViewModel.worktimeEntryId = 0
+
             this@EditViewModel.externalId = 0
+
             startDate = startDate.withMinute(LocalDateTime.now().minute)
             startDate = startDate.withHour(LocalDateTime.now().hour)
+
             endDate = endDate.withMinute(LocalDateTime.now().minute)
             endDate = endDate.withHour(LocalDateTime.now().hour)
         }
@@ -216,14 +288,13 @@ class EditViewModel(
      */
     fun setDate(start: Boolean, day: Int, month: Int, year: Int, hour: Int, minute: Int) {
         val localDateTime = LocalDateTime.of(year, month, day, hour, minute)
-        var date: OffsetDateTime = localDateTime.atOffset(localOffset)
+        val date: OffsetDateTime = localDateTime.atOffset(localOffset)
 
         Log.i("editViewModel", "setDate: $date")
 
         if (start) {
             startDate = date
-        }
-        else {
+        } else {
             endDate = date
         }
     }

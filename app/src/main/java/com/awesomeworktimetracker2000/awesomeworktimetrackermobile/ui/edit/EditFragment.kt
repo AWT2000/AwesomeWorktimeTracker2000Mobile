@@ -12,13 +12,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.DatePicker
-import android.widget.TimePicker
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.R
 import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.data.database.AWTDatabase
@@ -92,13 +90,39 @@ class EditFragment : Fragment() {
             tvEditTitle.text = editViewModel.editTitle.value.toString()
         })
 
-        editViewModel.projectNames.observe(viewLifecycleOwner, Observer { projects ->
-            val spinnerAdapter = ArrayAdapter(
+        editViewModel.projects.observe(viewLifecycleOwner, Observer { listOfSpinnerOptions ->
+            val spinnerAdapter = ProjectSpinnerAdapter(
                 application,
                 android.R.layout.simple_spinner_item,
-                projects
+                listOfSpinnerOptions
             )
             spnrProject.adapter = spinnerAdapter
+        })
+
+        editViewModel.start.observe(viewLifecycleOwner, Observer {
+            edit_start_datetime.text =
+                convertOffsetDateTimeToString(it)
+        })
+
+        editViewModel.end.observe(viewLifecycleOwner, Observer {
+            edit_end_datetime.text =
+                convertOffsetDateTimeToString(it)
+        })
+
+        editViewModel.selectedProjectIdLive.observe(viewLifecycleOwner, Observer { projectId ->
+            val index = (spnrProject.adapter as ProjectSpinnerAdapter).getIndexOfItemById(projectId)
+            spnrProject.setSelection(index)
+        })
+
+        editViewModel.savedSuccesfully.observe(viewLifecycleOwner, Observer {
+            if (it) {
+                val dateTimeOffset = editViewModel.startDate
+                val dateString = DateUtils.convertOffsetDateTimeToDateString(dateTimeOffset)
+
+                val action = EditFragmentDirections.actionEditFragmentToDateFragment(dateString)
+
+                this.findNavController().navigate(action)
+            }
         })
 
         val selectedProjectId: Int = editViewModel.selectedProjectId
@@ -112,41 +136,23 @@ class EditFragment : Fragment() {
 
 
     private fun setEditViews() {
-            try {
-                val offsetDateTime: OffsetDateTime = args.date!!
-                    .toInstant()
-                    .atOffset(localOffset)
-                editViewModel.getProjects()
-                editViewModel.pickDateTime(offsetDateTime, args.worktimeEntryId)
+        try {
+            val offsetDateTime: OffsetDateTime = args.date!!
+                .toInstant()
+                .atOffset(localOffset)
 
-                // TODO: set element returned to keys variable as spnrProject value
-                //  At the moment projectsMap returns null.
-                //  suspend this until editViewModel.getProjects() has been run?
-                Log.i("EditViewModel", "editViewModel.projectsMap size: ${editViewModel.projectsMap.size}")
-                val keys =
-                    editViewModel.projectsMap.filterValues { it == editViewModel.selectedProjectId }.keys
-                Log.i("EditViewModel", "Selected project: ${keys.elementAt(0).toInt()}")
-                spnrProject.setSelection(keys.elementAt(0).toInt())
+            editViewModel.getProjects()
 
-                // TODO: startDate, endDate null at this point
-                edit_start_datetime.text =
-                    convertOffsetDateTimeToString(editViewModel.startDate)
-                edit_end_datetime.text =
-                    convertOffsetDateTimeToString(editViewModel.endDate)
+            editViewModel.pickDateTime(offsetDateTime, args.worktimeEntryId)
 
+        } catch (e: Exception) {
+            Log.i("EditFragment", "Exception: ${e.message}")
+        } finally {
 
-            } catch (e: Exception) {
-                Log.i("EditFragment", "Exception: ${e.message}")
-            } finally {
-
-            }
+        }
     }
 
     private fun setOnClickListeners() {
-
-        var startDateListener: OnDateSetListener
-        var endDateListener: OnDateSetListener
-
         binding.editStartDatetime.setOnClickListener {
             val editStartDateTime = DatePickerDialog(
                 requireNotNull(this.context),
@@ -173,8 +179,10 @@ class EditFragment : Fragment() {
             Log.i("buttonSave", "${editViewModel.startDate}")
             Log.i("buttonSave", "${editViewModel.endDate}")
 
-            editViewModel.selectedProjectId =
-                editViewModel.projectsMap[spnrProject.selectedItem.toString()]!!
+            val spinnerOption = spnrProject.selectedItem as ProjectSpinnerOption
+
+            editViewModel.selectedProjectId = spinnerOption.project.id
+
             Log.i("selectedProjectId", "${editViewModel.selectedProjectId}")
             editViewModel.saveWorkTimeEntry()
         }
@@ -221,6 +229,7 @@ class EditFragment : Fragment() {
             edit_start_datetime.text =
                 convertOffsetDateTimeToString(editViewModel.startDate)
         }
+
     private val endTimeSetListener =
         OnTimeSetListener { _, hour, minute ->
             start = false
