@@ -25,7 +25,7 @@ class DateViewModel(
 
     // initialize inputDate and date variables
     private var inputDate: LocalDate = LocalDate.now()
-    private var date: Date = Date.from(inputDate.atStartOfDay(DateUtils.ZoneId).toInstant())
+    var date: Date = Date.from(inputDate.atStartOfDay(DateUtils.ZoneId).toInstant())
 
     // For updating DateFragment text view to current date
     private var _currentDateString = MutableLiveData<String>()
@@ -52,6 +52,7 @@ class DateViewModel(
      * @param date a date that work time entries are fetched from
      */
     fun getWorkTimeEntries(date: Date) {
+
         viewModelScope.launch(Dispatchers.IO) {
             this@DateViewModel.date = date
             this@DateViewModel.inputDate = date
@@ -83,8 +84,7 @@ class DateViewModel(
             }
         }
     }
-
-
+    
     /* TODO: in case call to worktimeEntryRepository fails with nextDate() or prevDate(), pass some temporary date object instead,
        and update the date LiveData object only after successful response
      */
