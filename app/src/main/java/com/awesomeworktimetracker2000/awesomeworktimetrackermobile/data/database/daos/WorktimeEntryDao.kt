@@ -31,4 +31,8 @@ interface WorktimeEntryDao {
 
     @Query("DELETE FROM worktime_entries WHERE user_id = :userId AND started_at >= :start AND ended_at <= :end")
     suspend fun clearWorktimeEntriesBetweenDates(userId: Int, start: String, end: String)
+
+    @Query ("DELETE FROM worktime_entries WHERE id = :id")
+    suspend fun deleteWorktimeEntry(id: Int)
+
 }
