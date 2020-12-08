@@ -23,7 +23,6 @@ import com.awesomeworktimetracker2000.awesomeworktimetrackermobile.viewmodels.da
 import kotlinx.android.synthetic.main.date_fragment.*
 import java.text.SimpleDateFormat
 
-
 class DateFragment : Fragment() {
 
     private lateinit var binding: DateFragmentBinding

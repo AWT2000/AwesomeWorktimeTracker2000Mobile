@@ -12,6 +12,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.core.view.isGone
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -86,6 +88,12 @@ class EditFragment : Fragment() {
 
         editViewModel.editTitle.observe(viewLifecycleOwner, Observer {
             tvEditTitle.text = editViewModel.editTitle.value.toString()
+            // hide/show deletebutton depending on add/edit
+            if (tvEditTitle.text == "Lisää") {
+                binding.btnDelete.visibility = View.GONE
+            } else {
+                binding.btnDelete.visibility = View.VISIBLE
+            }
         })
 
         editViewModel.projects.observe(viewLifecycleOwner, Observer { listOfSpinnerOptions ->
@@ -112,6 +120,8 @@ class EditFragment : Fragment() {
             spnrProject.setSelection(index)
         })
 
+
+
         editViewModel.savedSuccesfully.observe(viewLifecycleOwner, Observer {
             if (it) {
                 val dateTimeOffset = editViewModel.startDate
@@ -120,6 +130,11 @@ class EditFragment : Fragment() {
                 val action = EditFragmentDirections.actionEditFragmentToDateFragment(dateString)
 
                 this.findNavController().navigate(action)
+                Toast.makeText(
+                    application,
+                    getString(R.string.succesfulSave),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         })
 
@@ -183,6 +198,21 @@ class EditFragment : Fragment() {
 
         binding.btnDelete.setOnClickListener {
             editViewModel.deleteWorkTimeEntry()
+
+            // navigates back to dateview after delete.
+            // TODO: Maybe some kind of check, that the delete succeeded.
+            val dateTimeOffset = editViewModel.startDate
+            val dateString = DateUtils.convertOffsetDateTimeToDateString(dateTimeOffset)
+
+            val action = EditFragmentDirections.actionEditFragmentToDateFragment(dateString)
+
+            this.findNavController().navigate(action)
+
+            Toast.makeText(
+                application,
+                getString(R.string.succesfulDelete),
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
