@@ -50,13 +50,6 @@ class WeekViewModel(private val worktimeEntryRepository: WorktimeEntryRepository
     val datesBetween: LiveData<String>
         get() = _datesBetween
 
-
-    init {
-        Log.i("WeekViewModel", "WeekViewModel created")
-        Log.i("firstDayOfCurrentWeek", firstDayOfCurrentWeek.format(dateTimeFormat).toString())
-        Log.i("lastDayOfCurrentWeek", lastDayOfCurrentWeek.format(dateTimeFormat).toString())
-    }
-
     /**
      * get a selected date in string format
      *
@@ -80,9 +73,6 @@ class WeekViewModel(private val worktimeEntryRepository: WorktimeEntryRepository
         viewModelScope.launch(Dispatchers.IO) {
 
             val entryListing = worktimeEntryRepository.getCachedWorktimeEntriesBetweenDateTimes(localDateFrom.format(dateTimeFormat2).toString(), localDateTo.format(dateTimeFormat2).toString())
-            Log.i("WeekWorkTimeEntries", entryListing.worktimeEntries?.count().toString())
-            Log.i("dateFrom", localDateFrom.format(dateTimeFormat2))
-            Log.i("dateTo", localDateTo.format(dateTimeFormat2))
 
             if (entryListing.worktimeEntries != null) {
                 _worktimeEntries.postValue(entryListing.worktimeEntries)
@@ -98,7 +88,6 @@ class WeekViewModel(private val worktimeEntryRepository: WorktimeEntryRepository
 
         _datesBetween.postValue(firstDayOfCurrentWeek.format(dateTimeFormat) +
                 " - " + lastDayOfCurrentWeek.format(dateTimeFormat))
-        Log.i("Week", weekNumber.toString())
         getCachedWorkTimeEntries(firstDayOfCurrentWeek, lastDayOfCurrentWeek)
     }
     fun prevWeek() {
@@ -109,7 +98,6 @@ class WeekViewModel(private val worktimeEntryRepository: WorktimeEntryRepository
 
         _datesBetween.postValue(firstDayOfCurrentWeek.format(dateTimeFormat) +
                 " - " + lastDayOfCurrentWeek.format(dateTimeFormat))
-        Log.i("Week", weekNumber.toString())
         getCachedWorkTimeEntries(firstDayOfCurrentWeek, lastDayOfCurrentWeek)
     }
 }

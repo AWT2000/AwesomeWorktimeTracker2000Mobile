@@ -34,7 +34,6 @@ class LoginViewModel(private val userRepository: UserRepository) : ViewModel() {
      */
     fun tryLogin(email: String, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            Log.i("login", "LoginViewModel@tryLogin")
             val loginResponse = userRepository.login(
                 Credentials(
                     email,
@@ -56,6 +55,5 @@ class LoginViewModel(private val userRepository: UserRepository) : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        Log.i("login", "LoginViewModel cleared")
     }
 }

@@ -65,8 +65,6 @@ class DateFragment : Fragment() {
 
         dateViewModel = ViewModelProvider(this, dateViewModelFactory).get(DateViewModel::class.java)
 
-        Log.i("selectedDate", args.selectedDate.toString())
-
         // Observe currentDate in DateViewModel and update tvDate.text accordingly
         dateViewModel.currentDateString.observe(viewLifecycleOwner, Observer {
             this.tvDate.text = dateViewModel.currentDateString.value.toString()
@@ -95,12 +93,6 @@ class DateFragment : Fragment() {
         dateViewModel.worktimeEntries.observe(viewLifecycleOwner, Observer {
             it?.let { list ->
                 workTimeEntryAdapter.data = list
-            }
-
-            it.forEach { entry ->
-                Log.i("worktimeEntries", "external id: ${entry.externalId}, started_at: "
-                        + "${entry.startedAt.format(DateUtils.isoDateFormatter)}, "
-                        + "ended_at: ${entry.endedAt.format(DateUtils.isoDateFormatter)}" )
             }
         })
 

@@ -52,10 +52,6 @@ class EditViewModel(
 
     var selectedProjectIdLive = MutableLiveData<Int>()
 
-    init {
-        Log.i("EditViewModel", "EditViewModel created")
-    }
-
     private var _savedSuccessfully = MutableLiveData<Boolean>(false)
 
     val savedSuccesfully: LiveData<Boolean>
@@ -128,14 +124,11 @@ class EditViewModel(
             )
 
             viewModelScope.launch(Dispatchers.IO) {
-                Log.i("EditViewModel", "Updating localDB entry...")
                 var workTimeEntry: WorktimeEntry = worktimeEntryRepository.addEntryToDb(workTimeEntry)
-                Log.i("EditViewModel", "updated entry id: ${workTimeEntry.id}")
                 _savedSuccessfully.postValue(true)
             }
 
             GlobalScope.launch(Dispatchers.IO) {
-                Log.i("EditViewModel", "Updating apiDB entry...")
                 val saveResponse = worktimeEntryRepository.updateWorktimeEntry(this@EditViewModel.externalId, saveWorkTimeEntry)
 
                 if (saveResponse.status == ResponseStatus.OK) {
@@ -167,14 +160,11 @@ class EditViewModel(
             )
 
             viewModelScope.launch(Dispatchers.IO) {
-                Log.i("EditViewModel", "Adding localDB entry...")
                 workTimeEntry = worktimeEntryRepository.addEntryToDb(workTimeEntry)
-                Log.i("EditViewModel", "added entry id: ${workTimeEntry.id}")
                 _savedSuccessfully.postValue(true)
             }
 
             GlobalScope.launch(Dispatchers.IO) {
-                Log.i("EditViewModel", "Adding apiDB entry...")
                 val saveResponse = worktimeEntryRepository.addWorktimeEntry(saveWorkTimeEntry)
 
                 if (saveResponse.status == ResponseStatus.OK) {
@@ -195,12 +185,10 @@ class EditViewModel(
 
     fun deleteWorkTimeEntry() {
         viewModelScope.launch(Dispatchers.IO) {
-            Log.i("EditViewModel", "Deleting localDB entry...")
             worktimeEntryRepository.deleteEntryFromDb(this@EditViewModel.worktimeEntryId)
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            Log.i("EditViewModel", "Deleting apiDB entry...")
             worktimeEntryRepository.deleteWorktimeEntry(this@EditViewModel.externalId)
         }
     }
@@ -223,7 +211,6 @@ class EditViewModel(
 
         if (worktimeEntryId != 0) {
 
-            //_editTitle.postValue(R.string.edit.toString())
             _editTitle.postValue("Muokkaa")
             viewModelScope.launch(Dispatchers.IO) {
                 val worktimeEntryResponse =
@@ -232,9 +219,8 @@ class EditViewModel(
                 if (worktimeEntryResponse.status == ResponseStatus.OK
                     || worktimeEntryResponse.status == ResponseStatus.OFFLINE
                 ) {
-                    Log.i("editViewModel", worktimeEntryResponse.entry!!.id.toString())
 
-                    this@EditViewModel.worktimeEntry = worktimeEntryResponse.entry
+                    this@EditViewModel.worktimeEntry = worktimeEntryResponse.entry!!
 
                     this@EditViewModel.worktimeEntryId = worktimeEntry.id
 
@@ -255,13 +241,7 @@ class EditViewModel(
 
                         this@EditViewModel.selectedProjectIdLive.postValue(worktimeEntry.projectId!!)
 
-                        Log.i("selectedProjectId", "$selectedProjectId")
                     }
-
-                    Log.i("editViewModel", "worktimeEntryId: ${this@EditViewModel.worktimeEntryId}")
-                    Log.i("editViewModel", "externalId: ${this@EditViewModel.externalId}")
-                    Log.i("editViewModel", "startDate: ${startDate}")
-                    Log.i("editViewModel", "endDate: ${endDate}")
                 }
             }
         }
@@ -289,8 +269,6 @@ class EditViewModel(
     fun setDate(start: Boolean, day: Int, month: Int, year: Int, hour: Int, minute: Int) {
         val localDateTime = LocalDateTime.of(year, month, day, hour, minute)
         val date: OffsetDateTime = localDateTime.atOffset(localOffset)
-
-        Log.i("editViewModel", "setDate: $date")
 
         if (start) {
             startDate = date

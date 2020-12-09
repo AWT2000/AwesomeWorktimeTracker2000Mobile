@@ -103,7 +103,6 @@ class ProjectRepository private constructor (
      * @return ProjectListing with list of projects and response status
      */
     suspend fun syncProjects(): ProjectListing {
-        Log.i("projects", "Bearer $token")
         val response = apiService
             .getProjects("Bearer $token")
 
