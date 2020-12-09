@@ -27,7 +27,6 @@ class StartupFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.i(LOG_TAG, "on create view")
 
         // initialize binding
         val binding = DataBindingUtil.inflate<StartupFragmentBinding>(inflater, R.layout.startup_fragment, container, false)

@@ -47,7 +47,6 @@ class DateViewModel(
         get() = _worktimeEntries
 
     init {
-        Log.i("DateViewModel", "DateViewModel created")
     }
 
     /**
@@ -65,9 +64,6 @@ class DateViewModel(
                                             .toLocalDate()
 
             val entryListing = worktimeEntryRepository.getWorktimeEntriesByDate(date)
-            Log.i("entryListing", entryListing.worktimeEntries?.count().toString())
-            Log.i("entryListing", entryListing.status.toString())
-            Log.i("date", date.toString())
 
             // TODO: handling other statuses e.g. ResponseStatus.OFFLINE, ResponseStatus.UNAUTHORIZED, ResponseStatus.UNDEFINEDERROR
             //      - e.g. if device in offline mode, status is OFFLINE, not OK

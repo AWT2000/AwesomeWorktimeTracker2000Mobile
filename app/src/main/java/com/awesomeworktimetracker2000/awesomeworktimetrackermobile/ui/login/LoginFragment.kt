@@ -103,7 +103,6 @@ class LoginFragment : Fragment() {
      * Try login with given username and password.
      */
     private fun tryLogin() {
-        Log.i("login", "LoginFragment@tryLogin")
         viewModel.tryLogin(
             binding.editTextUsername.text.toString(),
             binding.editTextTextPassword.text.toString()

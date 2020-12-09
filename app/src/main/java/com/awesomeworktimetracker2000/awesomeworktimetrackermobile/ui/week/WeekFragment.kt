@@ -109,12 +109,10 @@ class WeekFragment : Fragment() {
             binding.btnSaturday-> selectedDate = weekViewModel.getDate(6)
             binding.btnSunday -> selectedDate = weekViewModel.getDate(7)
             else -> {
-                Log.i("selectedDate", "Failed to get selected date")
             }
         }
         val action = WeekFragmentDirections.actionWeekFragmentToDateFragment(selectedDate)
         this.findNavController().navigate(action)
-        Log.i("weekday", selectedDate.toString())
     }
 
     // TODO: use backgroundTint instead of color to not lose animations etc.
@@ -151,7 +149,6 @@ class WeekFragment : Fragment() {
                     if (i == 7) binding.btnSunday.setBackgroundDrawable(resources.getDrawable(R.drawable.weekday_contains_data_button))
 
                 }
-                Log.i("entryDate", entryDate)
             }
         }
     }

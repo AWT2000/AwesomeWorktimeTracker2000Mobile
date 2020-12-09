@@ -53,7 +53,6 @@ class UserRepository private constructor(
      * Tries to fetch user info from db and validate it by making api request.
      */
     private suspend fun tryCache(): LoginResponse {
-        Log.i("login", "UserRepository@tryCache")
         val userFromCache = getUserFromCache()
         if (userFromCache != null) {
             if (connectionUtils.hasInternetConnection()) {
@@ -67,15 +66,12 @@ class UserRepository private constructor(
                     }
                     LoginResponse(status = ResponseStatus.OK, user = userFromCache)
                 } else {
-                    Log.i("login", "UserRepository@tryCache, userFromApi = null")
                     LoginResponse(status = ResponseStatus.UNAUTHORIZED)
                 }
             } else {
-                Log.i("login", "UserRepository@tryCache, userFromCache != null && !connectionUtils.hasInternetConnection()")
                 return LoginResponse(status = ResponseStatus.OFFLINE, user = userFromCache)
             }
         } else {
-            Log.i("login", "UserRepository@tryCache, userFromCache = null")
             return LoginResponse(status = ResponseStatus.NOTFOUND)
         }
     }
@@ -85,7 +81,6 @@ class UserRepository private constructor(
      * @return UserInfo from db | null
      */
     private suspend fun getUserFromCache(): UserInfo? {
-        Log.i("login", "UserRepository@getUserFromCache")
         try {
             val userFromDb = userInfoDao.getUser()
             return if (userFromDb != null) {
@@ -96,7 +91,6 @@ class UserRepository private constructor(
                     id = userFromDb.id
                 )
             } else {
-                Log.i("login", "UserRepository@getUserFromCache user from db = null")
                 null;
             }
         } catch (e: Exception) {
@@ -111,7 +105,6 @@ class UserRepository private constructor(
      * @return UserInfo from web api | null
      */
     private suspend fun tryTokenValidity(user: UserInfo, firstTry: Boolean = true): UserInfo? {
-        Log.i("login", "UserRepository@tryTokenValidity")
         try {
             val response = apiService.getUser("Bearer " + user.accessToken)
             when {
@@ -125,7 +118,6 @@ class UserRepository private constructor(
                     )
                 }
                 response.code() == 401 -> {
-                    Log.i("login", "UserRepository@tryTokenValidity, response.code() == 401")
                     userInfoDao.removeUser()
                     return null
                 }
@@ -148,7 +140,6 @@ class UserRepository private constructor(
      * Makes a HTTP POST request to web api and if api responses with user, caches user info.
      */
     private suspend fun loginRequest(credentials: Credentials, firstTry: Boolean = true): LoginResponse {
-        Log.i("login", "UserRepository@login")
         try {
             val response = apiService.postLogin(credentials);
             when {
@@ -167,7 +158,6 @@ class UserRepository private constructor(
                     )
 
                     updateCachedUser(user)
-                    Log.i("login", "UserRepository, loginResponseDto.user.name: " + loginResponseDto.user.name)
                     return LoginResponse(status = ResponseStatus.OK, user = user)
                 }
                 response.code() != 401 && firstTry -> {
@@ -188,7 +178,6 @@ class UserRepository private constructor(
      * Updates user info in database and sets live data value
      */
     private suspend fun updateCachedUser(user: UserInfo) {
-        Log.i("login", "UserRepository@updateCachedUser")
         try {
             userInfoDao.upsertUser(
                 DatabaseUserInfo(

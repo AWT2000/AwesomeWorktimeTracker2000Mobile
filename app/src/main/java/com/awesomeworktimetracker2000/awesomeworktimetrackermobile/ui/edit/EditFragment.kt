@@ -72,8 +72,6 @@ class EditFragment : Fragment() {
 
         val worktimeEntryId = args.worktimeEntryId
         val passedDate: Date? = args.date
-        Log.i("passedDate", "$passedDate")
-        Log.i("passedEntryId", "$worktimeEntryId")
 
         val editViewMOdelFactory = EditViewModelFactory(
             AWTDatabase.getInstance(application).worktimeEntryDao,
@@ -126,7 +124,6 @@ class EditFragment : Fragment() {
         })
 
         val selectedProjectId: Int = editViewModel.selectedProjectId
-        Log.i("selectedProjectId", "${selectedProjectId}")
 
         setEditViews()
         setOnClickListeners()
@@ -176,14 +173,11 @@ class EditFragment : Fragment() {
         }
 
         binding.btnSave.setOnClickListener {
-            Log.i("buttonSave", "${editViewModel.startDate}")
-            Log.i("buttonSave", "${editViewModel.endDate}")
 
             val spinnerOption = spnrProject.selectedItem as ProjectSpinnerOption
 
             editViewModel.selectedProjectId = spinnerOption.project.id
 
-            Log.i("selectedProjectId", "${editViewModel.selectedProjectId}")
             editViewModel.saveWorkTimeEntry()
         }
 

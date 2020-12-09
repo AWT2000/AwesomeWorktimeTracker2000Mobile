@@ -49,7 +49,6 @@ class DataSyncService private constructor(
             && connectionUtils.hasInternetConnection())
         {
             unsyncedWorktimeEntryListing.worktimeEntries?.let {
-                Log.i("sync", it.size.toString())
 
                 it.forEach { entry ->
                     val saveWorkTimeEntry = SaveWorktimeEntryRequest(

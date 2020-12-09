@@ -139,9 +139,6 @@ class WorktimeEntryRepository private constructor (
         startDateTimeString: String,
         endDateTimeString: String
     ): WorktimeEntryListing {
-        Log.i("worktimeEntries", "Bearer $token")
-
-        Log.i("worktimeEntries", "start: $startDateTimeString, end: $endDateTimeString")
 
         val response = apiService
             .getWorktimeEntries("Bearer $token",
@@ -174,7 +171,6 @@ class WorktimeEntryRepository private constructor (
             }
             WorktimeEntryListing(ResponseStatus.UNDEFINEDERROR)
         } else {
-            Log.i("worktimeEntries", "WorktimeEntryRepository@fetchTodaysWorktimeEntries response was not successful, status code: " + response.code())
             return if (response.code() == 401) {
                 WorktimeEntryListing(ResponseStatus.UNAUTHORIZED)
             } else {
@@ -258,7 +254,6 @@ class WorktimeEntryRepository private constructor (
             return SaveWorktimeEntryResponse(ResponseStatus.OFFLINE)
         }
 
-        Log.i("worktimeEntries", "WorktimeEntryRepository@addWorktimeEntry")
         val response = apiService.addWorktimeEntry(
             "Bearer $token",
             SaveWorktimeEntryRequest(
@@ -275,17 +270,13 @@ class WorktimeEntryRepository private constructor (
             return
         }
 
-        Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry")
-
         val response = apiService.deleteWorktimeEntry(
             token = "Bearer $token",
             id = externalId
         )
 
         if (response.isSuccessful) {
-            Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry response.isSuccessful!")
         } else {
-            Log.i("worktimeEntries", "WorktimeEntryRepository@deleteWorktimeEntry response.code: " + response.code())
             if (response.code() != 404 && response.code() != 401) {
                 response.errorBody()?.let {
                     val errorJson = JSONObject(it.toString())
@@ -305,8 +296,6 @@ class WorktimeEntryRepository private constructor (
         if (!connectionUtils.hasInternetConnection()) {
             return SaveWorktimeEntryResponse(ResponseStatus.OFFLINE)
         }
-
-        Log.i("worktimeEntries", "WorktimeEntryRepository@updateWorktimeEntry")
 
         val response = apiService.updateWorktimeEntry(
             token = "Bearer $token",
@@ -328,11 +317,6 @@ class WorktimeEntryRepository private constructor (
         if (response.isSuccessful) {
             val entryFromApi = response.body()!!
 
-            Log.i("worktimeEntries", "WorktimeEntryRepository@handleSaveWorktimeEntryResponse response.isSuccessful!! external_id: ${entryFromApi.id}")
-
-            Log.i("worktimeEntries", "entryFromApi.started_at: ${entryFromApi.started_at}")
-            Log.i("worktimeEntries", "entryFromApi.ended_at: ${entryFromApi.ended_at}")
-
             return SaveWorktimeEntryResponse(
                 status = ResponseStatus.OK,
                 worktimeEntry = WorktimeEntry(
@@ -344,7 +328,6 @@ class WorktimeEntryRepository private constructor (
                 )
             )
         } else {
-            Log.i("worktimeEntries", "WorktimeEntryRepository@handleSaveWorktimeEntryResponse response.code: " + response.code())
             if (response.code() != 404 && response.code() != 401) {
                 response.errorBody()?.let {
                     val errorJson = JSONObject(it.toString())
