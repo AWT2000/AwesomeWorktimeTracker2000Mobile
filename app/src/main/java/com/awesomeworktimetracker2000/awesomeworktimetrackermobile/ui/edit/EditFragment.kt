@@ -120,8 +120,6 @@ class EditFragment : Fragment() {
             spnrProject.setSelection(index)
         })
 
-
-
         editViewModel.savedSuccesfully.observe(viewLifecycleOwner, Observer {
             if (it) {
                 val dateTimeOffset = editViewModel.startDate
@@ -133,6 +131,16 @@ class EditFragment : Fragment() {
                 Toast.makeText(
                     application,
                     getString(R.string.succesfulSave),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        })
+
+        editViewModel.startIsAfterEnd.observe(viewLifecycleOwner, Observer {
+            if (it) {
+                Toast.makeText(
+                    application,
+                    getString(R.string.checkSelectedDates),
                     Toast.LENGTH_LONG
                 ).show()
             }

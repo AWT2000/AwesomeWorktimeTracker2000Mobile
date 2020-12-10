@@ -31,4 +31,5 @@
     <string name="feature_not_implemented">Ominaisuus ei vielä implementoitu.</string>
     <string name="succesfulDelete">Merkintä poistettu onnistuneesti.</string>
     <string name="succesfulSave">Merkintä tallennettu onnistuneesti.</string>
+    <string name="checkSelectedDates">Tarkista annetut päivämäärät!</string>
 </resources>

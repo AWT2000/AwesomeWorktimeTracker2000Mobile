@@ -41,6 +41,8 @@ class EditViewModel(
     var start = MutableLiveData<OffsetDateTime>()
     var end = MutableLiveData<OffsetDateTime>()
 
+    var startIsAfterEnd = MutableLiveData<Boolean>(false)
+
     /**
      * Observable lists of project id's and names for spnrProject
      */
@@ -96,6 +98,11 @@ class EditViewModel(
      * update or add new workTimeEntry
      */
     fun saveWorkTimeEntry() {
+
+        if (startDate.isAfter(endDate)) {
+            startIsAfterEnd.postValue(true)
+            return;
+        }
 
         var projectId: Int? = null
 
