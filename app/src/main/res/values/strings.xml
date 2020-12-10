@@ -29,4 +29,6 @@
     <string name="btnStatistics">Omat merkinnät</string>
     <string name="btnSettings">Asetukset</string>
     <string name="feature_not_implemented">Ominaisuus ei vielä implementoitu.</string>
+    <string name="succesfulDelete">Merkintä poistettu onnistuneesti.</string>
+    <string name="succesfulSave">Merkintä tallennettu onnistuneesti.</string>
 </resources>
